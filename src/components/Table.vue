@@ -23,7 +23,7 @@
       <thead>
       <tr>
         <th
-         v-for="header in this.tables[tab].headers"
+         v-for="header in this.tablesModel[tab].headers"
          :key="header.rowKey"
         >
           {{header.text}}
@@ -33,11 +33,11 @@
 
       <tbody>
       <tr
-       v-for="row in this.tables[tab].rows"
+       v-for="row in this.tablesModel[tab].rows"
        :key="row.uid"
       >
         <td
-         v-for="key in sortedRowKeys"
+         v-for="key in rowKeys"
          :key="key"
         >
           {{row[key]}}
@@ -58,9 +58,17 @@ export default class Table extends Vue {
   @Prop({ type: Array }) private readonly tables!: Array<GTable>;
 
   tab = 0;
+  tablesModel: Array<GTable> = [];
 
-  get sortedRowKeys(): Array<string> {
-    return this.tables[this.tab].headers.reduce((acc: Array<string>, header: Header) => {
+  created() {
+    this.tablesModel = JSON.parse(JSON.stringify(this.tables));
+    this.tablesModel.forEach(table => {
+      table.headers.sort((a, b) => a.order - b.order)
+    })
+  }
+
+  get rowKeys(): Array<string> {
+    return this.tablesModel[this.tab].headers.reduce((acc: Array<string>, header: Header) => {
       const prop = Object.keys(header).find(prop => prop === 'rowKey');
       if (prop && prop === 'rowKey') acc.push(header[prop]);
       return acc;
