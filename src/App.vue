@@ -1,29 +1,149 @@
 <template>
   <div id="app">
-    <img alt="Vue logo" src="./assets/logo.png">
-    <HelloWorld msg="Welcome to Your Vue.js + TypeScript App"/>
+    <Table
+     :tables="data.tables"
+    />
   </div>
 </template>
 
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator';
-import HelloWorld from './components/HelloWorld.vue';
+import Table from './components/Table.vue';
 
 @Component({
   components: {
-    HelloWorld,
+    Table,
   },
 })
-export default class App extends Vue {}
+export default class App extends Vue {
+  data = {
+    tables: [
+      {
+        label: 'Used cars',
+        headers: [
+          {
+            text: 'Brand',
+            rowKey: 'brand',
+            order: 1,
+          },
+          {
+            text: 'Color',
+            rowKey: 'color',
+            order: 2,
+          },
+          {
+            text: 'Type',
+            rowKey: 'type',
+            order: 3,
+          },
+          {
+            text: 'Year',
+            rowKey: 'year',
+            order: 4,
+          },
+        ],
+        rows: [
+          {
+            brand: 'Ford',
+            color: 'silver',
+            type: 'sedan',
+            year: '2015',
+            uid: '1'
+          },
+          {
+            brand: 'Mazda',
+            color: 'red',
+            type: 'hatchback',
+            year: '2014',
+            uid: '2'
+          },
+          {
+            brand: 'BMW',
+            color: 'black',
+            type: 'sedan',
+            year: '2014',
+            uid: '3'
+          },
+          {
+            brand: 'Audi',
+            color: 'white',
+            type: 'sedan',
+            year: '2009',
+            uid: '4'
+          },
+        ],
+      },
+      {
+        label: 'Brand new cars',
+        headers: [
+          {
+            text: 'Brand',
+            rowKey: 'brand',
+            order: 1,
+          },
+          {
+            text: 'Color',
+            rowKey: 'color',
+            order: 2,
+          },
+          {
+            text: 'Type',
+            rowKey: 'type',
+            order: 3,
+          },
+          {
+            text: 'Year',
+            rowKey: 'year',
+            order: 4,
+          },
+        ],
+        rows: [
+          {
+            brand: 'Ford',
+            color: 'red',
+            type: 'sedan',
+            year: '2020',
+            uid: '1'
+          },
+          {
+            brand: 'Volkswagen',
+            color: 'silver',
+            type: 'sedan',
+            year: '2020',
+            uid: '2'
+          },
+          {
+            brand: 'Mercedes',
+            color: 'blue',
+            type: 'sedan',
+            year: '2020',
+            uid: '3'
+          },
+          {
+            brand: 'Audi',
+            color: 'red',
+            type: 'sedan',
+            year: '2020',
+            uid: '4'
+          },
+        ],
+      },
+    ],
+  }
+}
 </script>
 
 <style lang="scss">
-#app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-  margin-top: 60px;
-}
+  body {
+    background-color: #fafafa;
+  }
+
+  #app {
+    font-family: Avenir, Helvetica, Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-align: center;
+    color: #2c3e50;
+    margin-top: 60px;
+  }
 </style>
