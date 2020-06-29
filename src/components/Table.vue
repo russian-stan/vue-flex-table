@@ -14,25 +14,25 @@
     <table class="g-table">
       <colgroup>
         <col
-         v-for="header in this.tablesModel[tab].headers"
+         v-for="header in tablesModel[tab].headers"
          :key="header.rowKey"
         >
       </colgroup>
 
       <thead>
-      <tr>
-        <th
-         v-for="header in this.tablesModel[tab].headers"
-         :key="header.rowKey"
-        >
-          {{header.text}}
-        </th>
-      </tr>
+        <Draggable tag="tr" v-model="tablesModel[tab].headers">
+          <th
+           v-for="header in tablesModel[tab].headers"
+           :key="header.rowKey"
+          >
+            {{header.text}}
+          </th>
+        </Draggable>
       </thead>
 
       <tbody>
       <tr
-       v-for="row in this.tablesModel[tab].rows"
+       v-for="row in tablesModel[tab].rows"
        :key="row.uid"
       >
         <td
@@ -50,10 +50,15 @@
 
 <script lang="ts">
 import { Component, Prop, Vue } from 'vue-property-decorator';
-import { VTable, Header } from '@/Types/tableTypes';
+import { VTable, Header } from '@/types/tableTypes';
 import { copyDeep } from '@/helpers/copyDeep';
+import Draggable from 'vuedraggable';
 
-@Component
+@Component({
+  components: {
+    Draggable,
+  },
+})
 export default class Table extends Vue {
   @Prop({ type: Array }) private readonly tables!: Array<VTable>;
 
@@ -109,9 +114,7 @@ export default class Table extends Vue {
     width: 100%;
 
     thead {
-      background-color: #1a7fc3;
       color: #fafafa;
-      border: solid 1px rgba(0, 0, 0, 0.12);
     }
 
     tbody {
@@ -122,6 +125,7 @@ export default class Table extends Vue {
     th {
       padding: 10px;
       position: relative;
+      background-color: #1a7fc3;
       cursor: pointer;
 
       &:not(:last-child) {
