@@ -12,7 +12,7 @@ export interface Row {
   uid: string;
 }
 
-export interface GTable {
+export interface VTable {
   label: string;
   headers: Header[];
   rows: Row[];

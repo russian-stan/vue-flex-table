@@ -13,11 +13,10 @@
 
     <table class="g-table">
       <colgroup>
-        <col>
-        <col>
-        <col>
-        <col>
-        <col>
+        <col
+         v-for="header in this.tablesModel[tab].headers"
+         :key="header.rowKey"
+        >
       </colgroup>
 
       <thead>
@@ -51,20 +50,20 @@
 
 <script lang="ts">
 import { Component, Prop, Vue } from 'vue-property-decorator';
-import { GTable, Header } from '@/Types/tableTypes';
+import { VTable, Header } from '@/Types/tableTypes';
+import { copyDeep } from '@/helpers/copyDeep';
 
 @Component
 export default class Table extends Vue {
-  @Prop({ type: Array }) private readonly tables!: Array<GTable>;
+  @Prop({ type: Array }) private readonly tables!: Array<VTable>;
 
   tab = 0;
-  tablesModel: Array<GTable> = [];
+  tablesModel: Array<VTable> = [];
 
   created() {
-    this.tablesModel = JSON.parse(JSON.stringify(this.tables));
-    this.tablesModel.forEach(table => {
-      table.headers.sort((a, b) => a.order - b.order)
-    })
+    // this.tablesModel = JSON.parse(JSON.stringify(this.tables));
+    this.tablesModel = copyDeep<VTable[]>(this.tables);
+    this.tablesModel.forEach(table => table.headers.sort((a, b) => a.order - b.order))
   }
 
   get rowKeys(): Array<string> {
