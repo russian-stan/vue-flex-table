@@ -3,15 +3,17 @@
 
     <div v-if="tables.length > 1" class="table-tabs">
       <button
-       v-for="(tab, key) in tables"
-       :key="tab.label"
-       @click="switchTab(key)"
-       class="table-tab">
-        {{tab.label}}
+       v-for="(table, index) in tables"
+       :key="table.label"
+       @click="tab = index"
+       class="table-tab"
+       :class="{'active': tab === index}"
+      >
+        {{table.label}} / {{index}}
       </button>
     </div>
 
-    <table class="g-table">
+    <table>
       <colgroup>
         <col
          v-for="header in tablesModel[tab].headers"
@@ -20,43 +22,43 @@
       </colgroup>
 
       <thead>
-        <Draggable tag="tr" v-model="tablesModel[tab].headers">
-          <th
-           v-for="header in tablesModel[tab].headers"
-           :key="header.rowKey"
-          >
-            {{header.text}}
-          </th>
-        </Draggable>
+      <draggable tag="tr" v-model="tablesModel[tab].headers">
+        <th
+         v-for="header in tablesModel[tab].headers"
+         :key="header.rowKey"
+        >
+          {{header.text}}
+          <i class="material-icons sort-icon">arrow_drop_down</i>
+        </th>
+      </draggable>
       </thead>
 
       <tbody>
-      <tr
-       v-for="row in tablesModel[tab].rows"
-       :key="row.uid"
-      >
-        <td
-         v-for="key in rowKeys"
-         :key="key"
+        <tr
+         v-for="row in tablesModel[tab].rows"
+         :key="row.uid"
         >
-          {{row[key]}}
-        </td>
-      </tr>
+          <td
+           v-for="key in rowKeys"
+           :key="key"
+          >
+            {{row[key]}}
+          </td>
+        </tr>
       </tbody>
     </table>
   </div>
-
 </template>
 
 <script lang="ts">
 import { Component, Prop, Vue } from 'vue-property-decorator';
 import { VTable, Header } from '@/types/tableTypes';
 import { copyDeep } from '@/helpers/copyDeep';
-import Draggable from 'vuedraggable';
+import draggable from 'vuedraggable';
 
 @Component({
   components: {
-    Draggable,
+    draggable,
   },
 })
 export default class Table extends Vue {
@@ -77,10 +79,6 @@ export default class Table extends Vue {
       if (prop && prop === 'rowKey') acc.push(header[prop]);
       return acc;
     }, [])
-  }
-
-  switchTab(key: number) {
-    this.tab = key;
   }
 }
 </script>
@@ -107,6 +105,10 @@ export default class Table extends Vue {
     cursor: pointer;
     width: 50%;
     padding: 10px;
+
+    &.active {
+      border-bottom: 2px solid #000000;
+    }
   }
 
   table {
@@ -130,6 +132,12 @@ export default class Table extends Vue {
 
       &:not(:last-child) {
         border-right: 1px solid rgba(#fafafa, 0.12);
+      }
+
+      .sort-icon {
+        position: absolute;
+        top: 0;
+        right: 0;
       }
     }
 
