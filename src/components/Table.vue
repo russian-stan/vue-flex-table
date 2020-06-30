@@ -9,7 +9,7 @@
        class="table-tab"
        :class="{'active': tab === index}"
       >
-        {{table.label}} / {{index}}
+        {{table.label}}
       </button>
     </div>
 
@@ -17,7 +17,7 @@
       <colgroup>
         <col
          v-for="header in tablesModel[tab].headers"
-         :key="header.rowKey"
+         :key="header.row_key"
         >
       </colgroup>
 
@@ -25,23 +25,40 @@
       <draggable tag="tr" v-model="tablesModel[tab].headers">
         <th
          v-for="header in tablesModel[tab].headers"
-         :key="header.rowKey"
-         :class="{'active': header.rowKey === currentSort}"
-         @click="sortBy(header.rowKey)"
+         :key="header.row_key"
+         :class="{'active': header.row_key === currentColumnName}"
+         @click="sortBy(header.row_key)"
         >
           {{header.text}}
-          <button
-           class="sort-btn sort-btn--up"
-           @click="changeSortDir('asc')"
-          >
-            <i class="material-icons">arrow_drop_up</i>
-          </button>
-          <button
-           class="sort-btn sort-btn--down"
-           @click="changeSortDir('desc')"
-          >
-            <i class="material-icons">arrow_drop_down</i>
-          </button>
+
+          <div v-if="currentColumnName === header.row_key" class="sort-buttons">
+            <!--ASC-BTN-->
+            <button
+             class="sort-btn"
+             @click="changeSortDirForCurCol(header.row_key, 'asc')"
+            >
+              <i
+               class="material-icons"
+               :class="{'active': header.sort_dir === 'asc'}"
+              >
+                arrow_drop_up
+              </i>
+            </button>
+
+            <!--DESC-BTN-->
+            <button
+             class="sort-btn"
+             @click="changeSortDirForCurCol(header.row_key, 'desc')"
+            >
+              <i
+               class="material-icons"
+               :class="{'active': header.sort_dir === 'desc'}"
+              >
+                arrow_drop_down
+              </i>
+            </button>
+          </div>
+
         </th>
       </draggable>
       </thead>
@@ -52,7 +69,7 @@
        :key="row.uid"
       >
         <td
-         v-for="key in rowKeys"
+         v-for="key in row_keys"
          :key="key"
         >
           {{row[key]}}
@@ -78,32 +95,31 @@ export default class Table extends Vue {
   @Prop({ type: Array }) private readonly tables!: Array<VTable>;
 
   tab = 0;
-  currentSort = '';
-  currentSortDir = 'asc';
+  currentColumnName = '';
+  currentColumnDir: 'asc' | 'desc' = 'asc';
   tablesModel: Array<VTable> = [];
 
   created() {
-    // this.tablesModel = JSON.parse(JSON.stringify(this.tables));
     this.tablesModel = copyDeep<VTable[]>(this.tables);
     this.tablesModel.forEach(table => table.headers.sort((a, b) => a.order - b.order))
+    this.tablesModel.forEach(table => table.headers.forEach(header => header.sort_dir = 'asc'));
   }
 
-  get rowKeys(): Array<string> {
+  get row_keys(): Array<string> {
     return this.tablesModel[this.tab].headers.reduce((acc: Array<string>, header: Header) => {
-      const prop = Object.keys(header).find(prop => prop === 'rowKey');
-      if (prop && prop === 'rowKey') acc.push(header[prop]);
+      const prop = Object.keys(header).find(prop => prop === 'row_key');
+      if (prop && prop === 'row_key') acc.push(header[prop]);
       return acc;
     }, [])
   }
 
   get sortedItems(): Row[] {
-    console.log('sortedItems');
-    if (this.currentSort) {
+    if (this.currentColumnName) {
       return this.tablesModel[this.tab].rows.sort((a, b) => {
-        const modifier = this.currentSortDir === "asc" ? 1 : -1;
+        const modifier = this.currentColumnDir === 'asc' ? 1 : -1;
 
-        const x = a[this.currentSort as keyof Row].trim().toLowerCase();
-        const y = b[this.currentSort as keyof Row].trim().toLowerCase();
+        const x = a[this.currentColumnName as keyof Row].trim().toLowerCase();
+        const y = b[this.currentColumnName as keyof Row].trim().toLowerCase();
 
         if (x < y) return -1 * modifier;
         if (x > y) return 1 * modifier;
@@ -113,12 +129,20 @@ export default class Table extends Vue {
     return this.tablesModel[this.tab].rows;
   }
 
-  sortBy(colName: string) {
-    if (this.currentSort !== colName) this.currentSort = colName;
+  findColForSort(): Header {
+    return this.tablesModel[this.tab].headers.find(header => header.row_key === this.currentColumnName)!;
   }
 
-  changeSortDir(dir: 'asc' | 'desc') {
-    this.currentSortDir = dir
+  sortBy(colName: string) {
+    this.currentColumnName = colName;
+    const colForSort = this.findColForSort();
+    this.currentColumnDir = colForSort!.sort_dir;
+  }
+
+  changeSortDirForCurCol(colName: string, dir: 'asc' | 'desc') {
+    this.currentColumnName = colName;
+    const colForSort = this.findColForSort();
+    colForSort!.sort_dir = dir;
   }
 }
 </script>
@@ -127,6 +151,7 @@ export default class Table extends Vue {
 
   .table-wrapper {
     width: 100%;
+    box-sizing: border-box;
   }
 
   .table-tabs {
@@ -135,9 +160,9 @@ export default class Table extends Vue {
   }
 
   .table-tab {
-    border: 1px solid #1a7fc3;
+    border: 1px solid rgba(#0277BD, 0.3);
     background-color: #f5f5f5;
-    color: #1a7fc3;
+    color: #0277BD;
     font-family: inherit;
     font-size: 14px;
     text-transform: uppercase;
@@ -145,9 +170,15 @@ export default class Table extends Vue {
     cursor: pointer;
     width: 50%;
     padding: 10px;
+    outline: none;
+    transition: all 0.25s ease-in-out;
 
     &.active {
-      border-bottom: 2px solid #000000;
+      background-color: rgba(#0277BD, 0.4);
+    }
+
+    &:hover {
+      background-color: rgba(#0277BD, 0.2);
     }
   }
 
@@ -167,16 +198,25 @@ export default class Table extends Vue {
     th {
       padding: 10px;
       position: relative;
-      background-color: #1a7fc3;
+      background-color: #0277BD;
       cursor: pointer;
 
       &:not(:last-child) {
         border-right: 1px solid rgba(#fafafa, 0.12);
       }
 
-      .sort-btn {
+      .sort-buttons {
         position: absolute;
-        right: 0;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        top: 5px;
+        right: 2px;
+        width: 25px;
+        height: 27px;
+      }
+
+      .sort-btn {
         display: flex;
         align-items: center;
         justify-content: center;
@@ -187,22 +227,18 @@ export default class Table extends Vue {
         padding: 0;
         cursor: pointer;
 
-        &--up {
-          top: 5px;
-        }
-
-        &--down {
-          top: 20px;
-        }
-
         .material-icons {
           line-height: 12px;
-          color: #1a7fc3;
+          color: rgba(#0277BD, 0.4);
+
+          &.active {
+            color: #0277BD;
+          }
         }
       }
 
       &.active {
-        color: rgba(#000000, 0.3);
+        color: #fafafa;
         text-decoration: underline;
       }
     }

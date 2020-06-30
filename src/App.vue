@@ -23,22 +23,22 @@ export default class App extends Vue {
         headers: [
           {
             text: 'Brand',
-            rowKey: 'brand',
+            row_key: 'brand',
             order: 1,
           },
           {
             text: 'Color',
-            rowKey: 'color',
+            row_key: 'color',
             order: 2,
           },
           {
             text: 'Type',
-            rowKey: 'type',
+            row_key: 'type',
             order: 3,
           },
           {
             text: 'Year',
-            rowKey: 'year',
+            row_key: 'year',
             order: 4,
           },
         ],
@@ -78,22 +78,22 @@ export default class App extends Vue {
         headers: [
           {
             text: 'Brand',
-            rowKey: 'brand',
+            row_key: 'brand',
             order: 1,
           },
           {
             text: 'Color',
-            rowKey: 'color',
+            row_key: 'color',
             order: 2,
           },
           {
             text: 'Type',
-            rowKey: 'type',
+            row_key: 'type',
             order: 3,
           },
           {
             text: 'Year',
-            rowKey: 'year',
+            row_key: 'year',
             order: 4,
           },
         ],

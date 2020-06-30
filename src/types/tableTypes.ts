@@ -1,7 +1,8 @@
 export interface Header {
   text: string;
-  rowKey: string;
+  row_key: string;
   order: number;
+  sort_dir: 'asc' | 'desc';
 }
 
 export interface Row {
