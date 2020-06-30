@@ -130,7 +130,8 @@ export default class Table extends Vue {
   }
 
   findColForSort(): Header {
-    return this.tablesModel[this.tab].headers.find(header => header.row_key === this.currentColumnName)!;
+    return this.tablesModel[this.tab].headers
+      .find(header => header.row_key === this.currentColumnName)!;
   }
 
   sortBy(colName: string) {
@@ -161,6 +162,7 @@ export default class Table extends Vue {
   }
 
   .table-tab {
+    position: relative;
     border: 1px solid rgba(#0277BD, 0.3);
     background-color: #fafafa;
     color: #0277BD;
@@ -172,6 +174,7 @@ export default class Table extends Vue {
     width: 50%;
     padding: 10px;
     outline: none;
+    overflow: hidden;
     transition: all 0.25s ease-in-out;
 
     &.active {
@@ -180,6 +183,26 @@ export default class Table extends Vue {
 
     &:hover {
       background-color: rgba(#0277BD, 0.2);
+    }
+
+    &:after {
+      content: "";
+      background: #fafafa;
+      display: block;
+      position: absolute;
+      padding-top: 300%;
+      padding-left: 350%;
+      margin-left: -20px!important;
+      margin-top: -120%;
+      opacity: 0;
+      transition: all 0.8s
+    }
+
+    &:active:after {
+      padding: 0;
+      margin: 0;
+      opacity: 1;
+      transition: 0s
     }
   }
 
@@ -201,6 +224,7 @@ export default class Table extends Vue {
       position: relative;
       background-color: #0277BD;
       cursor: pointer;
+      overflow: hidden;
 
       &:not(:last-child) {
         border-right: 1px solid rgba(#fafafa, 0.12);
@@ -230,6 +254,15 @@ export default class Table extends Vue {
         border: none;
         cursor: pointer;
         background-color: #fafafa;
+        transition: all 0.25s ease-in-out;
+
+        &:hover {
+          background-color: #e7dddd;
+        }
+
+        &:active {
+
+        }
 
         .material-icons {
           line-height: 10px;

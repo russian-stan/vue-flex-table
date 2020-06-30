@@ -48,28 +48,28 @@ export default class App extends Vue {
             color: 'silver',
             type: 'sedan',
             year: '2015',
-            uid: '1'
+            uid: '1',
           },
           {
             brand: 'Mazda',
             color: 'red',
             type: 'hatchback',
             year: '2014',
-            uid: '2'
+            uid: '2',
           },
           {
             brand: 'BMW',
             color: 'black',
             type: 'sedan',
             year: '2014',
-            uid: '3'
+            uid: '3',
           },
           {
             brand: 'Audi',
             color: 'white',
             type: 'sedan',
             year: '2009',
-            uid: '4'
+            uid: '4',
           },
         ],
       },
@@ -103,28 +103,28 @@ export default class App extends Vue {
             color: 'red',
             type: 'sedan',
             year: '2020',
-            uid: '1'
+            uid: '1',
           },
           {
             brand: 'Volkswagen',
             color: 'silver',
             type: 'hatchback',
             year: '2020',
-            uid: '2'
+            uid: '2',
           },
           {
             brand: 'Mercedes',
             color: 'blue',
             type: 'sedan',
             year: '2020',
-            uid: '3'
+            uid: '3',
           },
           {
             brand: 'Audi',
             color: 'red',
             type: 'hatchback',
             year: '2020',
-            uid: '4'
+            uid: '4',
           },
         ],
       },
