@@ -65,7 +65,7 @@
 
 <script lang="ts">
 import { Component, Prop, Vue } from 'vue-property-decorator';
-import { VTable, Header } from '@/types/tableTypes';
+import { VTable, Header, Row } from '@/types/tableTypes';
 import { copyDeep } from '@/helpers/copyDeep';
 import draggable from 'vuedraggable';
 
@@ -78,7 +78,7 @@ export default class Table extends Vue {
   @Prop({ type: Array }) private readonly tables!: Array<VTable>;
 
   tab = 0;
-  currentSort = 'brand';
+  currentSort = '';
   currentSortDir = 'asc';
   tablesModel: Array<VTable> = [];
 
@@ -96,19 +96,21 @@ export default class Table extends Vue {
     }, [])
   }
 
-  get sortedItems() {
+  get sortedItems(): Row[] {
     console.log('sortedItems');
+    if (this.currentSort) {
+      return this.tablesModel[this.tab].rows.sort((a, b) => {
+        const modifier = this.currentSortDir === "asc" ? 1 : -1;
 
-    return this.tablesModel[this.tab].rows.sort((a, b) => {
-      const modifier = this.currentSortDir === "asc" ? 1 : -1;
+        const x = a[this.currentSort as keyof Row].trim().toLowerCase();
+        const y = b[this.currentSort as keyof Row].trim().toLowerCase();
 
-      const x = a[this.currentSort].trim().toLowerCase();
-      const y = b[this.currentSort].trim().toLowerCase();
-
-      if (x < y) return -1 * modifier;
-      if (x > y) return 1 * modifier;
-      return 0;
-    });
+        if (x < y) return -1 * modifier;
+        if (x > y) return 1 * modifier;
+        return 0;
+      });
+    }
+    return this.tablesModel[this.tab].rows;
   }
 
   sortBy(colName: string) {
