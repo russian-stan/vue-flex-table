@@ -26,25 +26,38 @@
         <th
          v-for="header in tablesModel[tab].headers"
          :key="header.rowKey"
+         :class="{'active': header.rowKey === currentSort}"
+         @click="sortBy(header.rowKey)"
         >
           {{header.text}}
-          <i class="material-icons sort-icon">arrow_drop_down</i>
+          <button
+           class="sort-btn sort-btn--up"
+           @click="changeSortDir('asc')"
+          >
+            <i class="material-icons">arrow_drop_up</i>
+          </button>
+          <button
+           class="sort-btn sort-btn--down"
+           @click="changeSortDir('desc')"
+          >
+            <i class="material-icons">arrow_drop_down</i>
+          </button>
         </th>
       </draggable>
       </thead>
 
       <tbody>
-        <tr
-         v-for="row in tablesModel[tab].rows"
-         :key="row.uid"
+      <tr
+       v-for="row in sortedItems"
+       :key="row.uid"
+      >
+        <td
+         v-for="key in rowKeys"
+         :key="key"
         >
-          <td
-           v-for="key in rowKeys"
-           :key="key"
-          >
-            {{row[key]}}
-          </td>
-        </tr>
+          {{row[key]}}
+        </td>
+      </tr>
       </tbody>
     </table>
   </div>
@@ -65,6 +78,8 @@ export default class Table extends Vue {
   @Prop({ type: Array }) private readonly tables!: Array<VTable>;
 
   tab = 0;
+  currentSort = 'brand';
+  currentSortDir = 'asc';
   tablesModel: Array<VTable> = [];
 
   created() {
@@ -79,6 +94,29 @@ export default class Table extends Vue {
       if (prop && prop === 'rowKey') acc.push(header[prop]);
       return acc;
     }, [])
+  }
+
+  get sortedItems() {
+    console.log('sortedItems');
+
+    return this.tablesModel[this.tab].rows.sort((a, b) => {
+      const modifier = this.currentSortDir === "asc" ? 1 : -1;
+
+      const x = a[this.currentSort].trim().toLowerCase();
+      const y = b[this.currentSort].trim().toLowerCase();
+
+      if (x < y) return -1 * modifier;
+      if (x > y) return 1 * modifier;
+      return 0;
+    });
+  }
+
+  sortBy(colName: string) {
+    if (this.currentSort !== colName) this.currentSort = colName;
+  }
+
+  changeSortDir(dir: 'asc' | 'desc') {
+    this.currentSortDir = dir
   }
 }
 </script>
@@ -134,10 +172,36 @@ export default class Table extends Vue {
         border-right: 1px solid rgba(#fafafa, 0.12);
       }
 
-      .sort-icon {
+      .sort-btn {
         position: absolute;
-        top: 0;
         right: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 25px;
+        height: 12px;
+        outline: none;
+        margin: 0;
+        padding: 0;
+        cursor: pointer;
+
+        &--up {
+          top: 5px;
+        }
+
+        &--down {
+          top: 20px;
+        }
+
+        .material-icons {
+          line-height: 12px;
+          color: #1a7fc3;
+        }
+      }
+
+      &.active {
+        color: rgba(#000000, 0.3);
+        text-decoration: underline;
       }
     }
 
