@@ -1,8 +1,10 @@
+export type SortDir = 'asc' | 'desc';
+
 export interface Header {
   text: string;
   row_key: string;
   order: number;
-  sort_dir: 'asc' | 'desc';
+  sort_dir: SortDir;
 }
 
 export interface Row {

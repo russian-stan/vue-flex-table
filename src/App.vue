@@ -108,7 +108,7 @@ export default class App extends Vue {
           {
             brand: 'Volkswagen',
             color: 'silver',
-            type: 'sedan',
+            type: 'hatchback',
             year: '2020',
             uid: '2'
           },
@@ -122,7 +122,7 @@ export default class App extends Vue {
           {
             brand: 'Audi',
             color: 'red',
-            type: 'sedan',
+            type: 'hatchback',
             year: '2020',
             uid: '4'
           },

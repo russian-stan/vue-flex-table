@@ -69,7 +69,7 @@
        :key="row.uid"
       >
         <td
-         v-for="key in row_keys"
+         v-for="key in rowKeys"
          :key="key"
         >
           {{row[key]}}
@@ -82,7 +82,7 @@
 
 <script lang="ts">
 import { Component, Prop, Vue } from 'vue-property-decorator';
-import { VTable, Header, Row } from '@/types/tableTypes';
+import { VTable, Header, Row, SortDir } from '@/types/tableTypes';
 import { copyDeep } from '@/helpers/copyDeep';
 import draggable from 'vuedraggable';
 
@@ -96,16 +96,16 @@ export default class Table extends Vue {
 
   tab = 0;
   currentColumnName = '';
-  currentColumnDir: 'asc' | 'desc' = 'asc';
+  currentColumnDir: SortDir = 'asc';
   tablesModel: Array<VTable> = [];
 
   created() {
     this.tablesModel = copyDeep<VTable[]>(this.tables);
-    this.tablesModel.forEach(table => table.headers.sort((a, b) => a.order - b.order))
+    this.tablesModel.forEach(table => table.headers.sort((a, b) => a.order - b.order));
     this.tablesModel.forEach(table => table.headers.forEach(header => header.sort_dir = 'asc'));
   }
 
-  get row_keys(): Array<string> {
+  get rowKeys(): Array<string> {
     return this.tablesModel[this.tab].headers.reduce((acc: Array<string>, header: Header) => {
       const prop = Object.keys(header).find(prop => prop === 'row_key');
       if (prop && prop === 'row_key') acc.push(header[prop]);
@@ -135,23 +135,24 @@ export default class Table extends Vue {
 
   sortBy(colName: string) {
     this.currentColumnName = colName;
-    const colForSort = this.findColForSort();
-    this.currentColumnDir = colForSort!.sort_dir;
+    this.currentColumnDir = this.findColForSort()!.sort_dir;
   }
 
-  changeSortDirForCurCol(colName: string, dir: 'asc' | 'desc') {
+  changeSortDirForCurCol(colName: string, dir: SortDir) {
     this.currentColumnName = colName;
-    const colForSort = this.findColForSort();
-    colForSort!.sort_dir = dir;
+    this.findColForSort()!.sort_dir = dir;
   }
 }
 </script>
 
 <style scoped lang="scss">
 
+  *, *:before, *:after {
+    box-sizing: border-box;
+  }
+
   .table-wrapper {
     width: 100%;
-    box-sizing: border-box;
   }
 
   .table-tabs {
@@ -161,7 +162,7 @@ export default class Table extends Vue {
 
   .table-tab {
     border: 1px solid rgba(#0277BD, 0.3);
-    background-color: #f5f5f5;
+    background-color: #fafafa;
     color: #0277BD;
     font-family: inherit;
     font-size: 14px;
@@ -207,13 +208,14 @@ export default class Table extends Vue {
 
       .sort-buttons {
         position: absolute;
+        top: 50%;
+        margin-top: calc(-25px / 2);
+        right: 2px;
+        width: 25px;
+        height: 25px;
         display: flex;
         flex-direction: column;
         justify-content: space-between;
-        top: 5px;
-        right: 2px;
-        width: 25px;
-        height: 27px;
       }
 
       .sort-btn {
@@ -221,14 +223,16 @@ export default class Table extends Vue {
         align-items: center;
         justify-content: center;
         width: 25px;
-        height: 12px;
+        height: 10px;
         outline: none;
         margin: 0;
         padding: 0;
+        border: none;
         cursor: pointer;
+        background-color: #fafafa;
 
         .material-icons {
-          line-height: 12px;
+          line-height: 10px;
           color: rgba(#0277BD, 0.4);
 
           &.active {
@@ -259,7 +263,7 @@ export default class Table extends Vue {
   }
 
   tbody tr:nth-of-type(odd) {
-    background-color: #fafafa;
+    background-color: rgba(#0277BD, 0.05);
   }
 
 </style>
