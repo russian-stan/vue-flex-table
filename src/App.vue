@@ -1,7 +1,14 @@
 <template>
   <div id="app">
+    <label>
+      Search
+      <input v-model.trim="search" type="text" style="margin-bottom: 20px; width: 200px">
+    </label>
     <Table
-     :tables="data.tables"
+      :tables="data.tables"
+     :search="search"
+     no-results-text="No matching records found"
+     no-data-text="No data to display"
     />
   </div>
 </template>
@@ -16,6 +23,7 @@ import Table from './components/Table.vue';
   },
 })
 export default class App extends Vue {
+  search = '';
   data = {
     tables: [
       {
@@ -142,7 +150,6 @@ export default class App extends Vue {
     font-family: Avenir, Helvetica, Arial, sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    text-align: center;
     color: #2c3e50;
     margin-top: 60px;
   }

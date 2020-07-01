@@ -1,82 +1,99 @@
 <template>
-  <div class="table-wrapper">
+  <div class="vf-table">
 
-    <div v-if="tables.length > 1" class="table-tabs">
-      <button
-       v-for="(table, index) in tables"
-       :key="table.label"
-       @click="tab = index"
-       class="table-tab"
-       :class="{'active': tab === index}"
-      >
-        {{table.label}}
-      </button>
+    <div class="table-wrapper">
+      <div v-if="tables.length > 1" class="table-tabs">
+        <button
+         v-for="(table, index) in tables"
+         :key="table.label"
+         @click="tab = index"
+         class="table-tab"
+         :class="{'active': tab === index}"
+        >
+          {{table.label}}
+        </button>
+      </div>
+
+      <table>
+        <colgroup
+         v-if="tables[tab].headers && tables[tab].headers.length"
+        >
+          <col
+           v-for="header in tablesModel[tab].headers"
+           :key="header.row_key"
+          >
+        </colgroup>
+
+        <thead v-if="tables[tab].headers && tables[tab].headers.length">
+        <draggable
+         tag="tr"
+         v-model="tablesModel[tab].headers"
+        >
+          <th
+           v-for="header in tablesModel[tab].headers"
+           :key="header.row_key"
+           :class="{'active': header.row_key === currentColumnName}"
+           @click="sortBy(header.row_key)"
+          >
+            {{header.text}}
+
+            <div
+             v-if="currentColumnName === header.row_key && filteredItems.length > 1"
+             class="sort-buttons"
+            >
+              <!--ASC-BTN-->
+              <button
+               class="sort-btn"
+               @click="changeSortDirForCurCol(header.row_key, 'asc')"
+              >
+                <i
+                 class="material-icons"
+                 :class="{'active': header.sort_dir === 'asc'}"
+                >
+                  arrow_drop_up
+                </i>
+              </button>
+
+              <!--DESC-BTN-->
+              <button
+               class="sort-btn"
+               @click="changeSortDirForCurCol(header.row_key, 'desc')"
+              >
+                <i
+                 class="material-icons"
+                 :class="{'active': header.sort_dir === 'desc'}"
+                >
+                  arrow_drop_down
+                </i>
+              </button>
+            </div>
+          </th>
+        </draggable>
+        </thead>
+
+        <tbody v-if="filteredItems.length">
+          <tr
+           v-for="row in sortedItems"
+           :key="row.uid"
+          >
+            <td
+             v-for="key in rowKeys"
+             :key="key"
+            >
+              {{row[key]}}
+            </td>
+          </tr>
+        </tbody>
+        <tbody v-else>
+        <tr>
+          <td class="no-match" :colspan="tablesModel[tab].headers.length">
+            {{isNoData ? noDataText : noResultsText}}
+          </td>
+        </tr>
+        </tbody>
+      </table>
     </div>
 
-    <table>
-      <colgroup>
-        <col
-         v-for="header in tablesModel[tab].headers"
-         :key="header.row_key"
-        >
-      </colgroup>
-
-      <thead>
-      <draggable tag="tr" v-model="tablesModel[tab].headers">
-        <th
-         v-for="header in tablesModel[tab].headers"
-         :key="header.row_key"
-         :class="{'active': header.row_key === currentColumnName}"
-         @click="sortBy(header.row_key)"
-        >
-          {{header.text}}
-
-          <div v-if="currentColumnName === header.row_key" class="sort-buttons">
-            <!--ASC-BTN-->
-            <button
-             class="sort-btn"
-             @click="changeSortDirForCurCol(header.row_key, 'asc')"
-            >
-              <i
-               class="material-icons"
-               :class="{'active': header.sort_dir === 'asc'}"
-              >
-                arrow_drop_up
-              </i>
-            </button>
-
-            <!--DESC-BTN-->
-            <button
-             class="sort-btn"
-             @click="changeSortDirForCurCol(header.row_key, 'desc')"
-            >
-              <i
-               class="material-icons"
-               :class="{'active': header.sort_dir === 'desc'}"
-              >
-                arrow_drop_down
-              </i>
-            </button>
-          </div>
-
-        </th>
-      </draggable>
-      </thead>
-
-      <tbody>
-      <tr
-       v-for="row in sortedItems"
-       :key="row.uid"
-      >
-        <td
-         v-for="key in rowKeys"
-         :key="key"
-        >
-          {{row[key]}}
-        </td>
-      </tr>
-      </tbody>
-    </table>
   </div>
 </template>
 
@@ -92,7 +109,19 @@ import draggable from 'vuedraggable';
   },
 })
 export default class Table extends Vue {
-  @Prop({ type: Array }) private readonly tables!: Array<VTable>;
+  @Prop({
+    type: Array, default() {
+      return [
+        {
+          headers: [],
+          rows: []
+        }
+      ]
+    },
+  }) private readonly tables!: Array<VTable>;
+  @Prop({ type: String, default: '' }) private readonly search!: string;
+  @Prop({ type: String, default: 'No matching records found' }) private readonly noResultsText!: string;
+  @Prop({ type: String, default: 'No data to display' }) private readonly noDataText!: string;
 
   tab = 0;
   currentColumnName = '';
@@ -105,6 +134,10 @@ export default class Table extends Vue {
     this.tablesModel.forEach(table => table.headers.forEach(header => header.sort_dir = 'asc'));
   }
 
+  get isNoData(): boolean {
+    return !Boolean(this.tables[this.tab].rows?.length);
+  }
+
   get rowKeys(): Array<string> {
     return this.tablesModel[this.tab].headers.reduce((acc: Array<string>, header: Header) => {
       const prop = Object.keys(header).find(prop => prop === 'row_key');
@@ -113,9 +146,18 @@ export default class Table extends Vue {
     }, [])
   }
 
+  get filteredItems(): Row[] {
+    if (this.search) {
+      return this.tablesModel[this.tab].rows.filter(item => {
+        return Object.values(item).some(item => item.toLowerCase().includes(this.search))
+      })
+    }
+    return this.tablesModel[this.tab].rows
+  }
+
   get sortedItems(): Row[] {
     if (this.currentColumnName) {
-      return this.tablesModel[this.tab].rows.sort((a, b) => {
+      return this.filteredItems.sort((a, b) => {
         const modifier = this.currentColumnDir === 'asc' ? 1 : -1;
 
         const x = a[this.currentColumnName as keyof Row].trim().toLowerCase();
@@ -126,7 +168,7 @@ export default class Table extends Vue {
         return 0;
       });
     }
-    return this.tablesModel[this.tab].rows;
+    return this.filteredItems;
   }
 
   findColForSort(): Header {
@@ -150,6 +192,10 @@ export default class Table extends Vue {
 
   *, *:before, *:after {
     box-sizing: border-box;
+  }
+
+  .vf-table {
+    width: 100%;
   }
 
   .table-wrapper {
@@ -192,7 +238,7 @@ export default class Table extends Vue {
       position: absolute;
       padding-top: 300%;
       padding-left: 350%;
-      margin-left: -20px!important;
+      margin-left: -20px !important;
       margin-top: -120%;
       opacity: 0;
       transition: all 0.8s
@@ -260,10 +306,6 @@ export default class Table extends Vue {
           background-color: #e7dddd;
         }
 
-        &:active {
-
-        }
-
         .material-icons {
           line-height: 10px;
           color: rgba(#0277BD, 0.4);
@@ -285,6 +327,10 @@ export default class Table extends Vue {
 
       &:not(:last-child) {
         border-right: 1px solid rgba(#000000, 0.12);
+      }
+
+      &.no-match {
+        padding: 20px;
       }
     }
 
