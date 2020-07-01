@@ -160,7 +160,13 @@ export default class VFTable extends Vue {
   }
 
   sortColumnsByOrder(): void {
-    this.tablesModel.forEach(table => table.headers.sort((a, b) => a!.order - b!.order));
+    this.tablesModel.forEach(table => table.headers.sort((a, b) => {
+      if (a.hasOwnProperty('order') && b.hasOwnProperty('order')) {
+        return a.order! - b.order!
+      } else {
+        return 0;
+      }
+    }));
   }
 
   addSortDirToRow(): void {
@@ -186,7 +192,7 @@ export default class VFTable extends Vue {
   get filteredItems(): Row[] {
     if (this.search) {
       return this.tablesModel[this.tab].rows.filter(item => {
-        return Object.values(item).some(item => item.toLowerCase().includes(this.search))
+        return Object.values(item).some(item => item.toString().toLowerCase().includes(this.search))
       })
     }
     return this.tablesModel[this.tab].rows
@@ -229,7 +235,11 @@ export default class VFTable extends Vue {
 
   findColType(key: string): ColType | undefined {
     const row = this.tablesModel[this.tab].headers.find(col => col.row_key === key);
-    return row.hasOwnProperty('col_type') ? row!['col_type'] : undefined;
+    if (row) {
+      return row.hasOwnProperty('col_type') ? row['col_type'] : undefined;
+    } else {
+      return undefined;
+    }
   }
 }
 </script>

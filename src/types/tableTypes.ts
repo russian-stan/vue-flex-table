@@ -11,7 +11,6 @@ export interface Header {
 
 export interface Row {
   [key: string]: string | number;
-  count?: string;
 }
 
 export interface VTable {
