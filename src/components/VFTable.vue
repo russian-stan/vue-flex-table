@@ -154,7 +154,7 @@ export default class Table extends Vue {
   }
 
   sortColumnsByOrder() {
-    this.tablesModel.forEach(table => table.headers.sort((a, b) => a.order - b.order));
+    this.tablesModel.forEach(table => table.headers.sort((a, b) => a!.order - b!.order));
   }
 
   addSortDir() {
@@ -191,8 +191,8 @@ export default class Table extends Vue {
       return this.filteredItems.sort((a, b) => {
         const modifier = this.currentColumnDir === 'asc' ? 1 : -1;
 
-        const x = a[this.currentColumnName as keyof Row].trim().toLowerCase();
-        const y = b[this.currentColumnName as keyof Row].trim().toLowerCase();
+        const x = a[this.currentColumnName as keyof Row]!.trim().toLowerCase();
+        const y = b[this.currentColumnName as keyof Row]!.trim().toLowerCase();
 
         if (x < y) return -1 * modifier;
         if (x > y) return 1 * modifier;
@@ -210,7 +210,7 @@ export default class Table extends Vue {
   sortBy(colName: string) {
     if (this.sortable) {
       this.currentColumnName = colName;
-      this.currentColumnDir = this.findColForSort()!.sort_dir;
+      this.currentColumnDir = this.findColForSort()!.sort_dir || 'asc';
     }
   }
 
