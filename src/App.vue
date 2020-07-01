@@ -5,8 +5,10 @@
       <input v-model.trim="search" type="text" style="margin-bottom: 20px; width: 200px">
     </label>
     <VFTable
-      :tables="data.tables"
+     :tables="data.tables"
      :search="search"
+     countable
+     sortable
      no-results-text="No matching records found"
      no-data-text="No data to display"
     />

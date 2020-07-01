@@ -13,6 +13,7 @@ export interface Row {
   type: string;
   year: string;
   uid: string;
+  count?: string;
 }
 
 export interface VTable {

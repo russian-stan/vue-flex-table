@@ -30,13 +30,18 @@
           <th
            v-for="header in tablesModel[tab].headers"
            :key="header.row_key"
-           :class="{'active': header.row_key === currentColumnName}"
-           @click="sortBy(header.row_key)"
+           :class="{
+             'active': header.row_key === currentColumnName,
+             'pointer': sortable
+           }"
+           @click="sortable ? sortBy(header.row_key) : null"
           >
             {{header.text}}
 
             <div
-             v-if="currentColumnName === header.row_key && filteredItems.length > 1"
+             v-if="sortable
+             && currentColumnName === header.row_key
+             && filteredItems.length > 1"
              class="sort-buttons"
             >
               <!--ASC-BTN-->
@@ -70,17 +75,17 @@
         </thead>
 
         <tbody v-if="filteredItems.length">
-          <tr
-           v-for="row in sortedItems"
-           :key="row.uid"
+        <tr
+         v-for="row in sortedItems"
+         :key="row.uid"
+        >
+          <td
+           v-for="key in rowKeys"
+           :key="key"
           >
-            <td
-             v-for="key in rowKeys"
-             :key="key"
-            >
-              {{row[key]}}
-            </td>
-          </tr>
+            {{row[key]}}
+          </td>
+        </tr>
         </tbody>
         <tbody v-else>
         <tr>
@@ -112,12 +117,14 @@ export default class Table extends Vue {
       return [
         {
           headers: [],
-          rows: []
-        }
+          rows: [],
+        },
       ]
     },
   }) private readonly tables!: Array<VTable>;
   @Prop({ type: String, default: '' }) private readonly search!: string;
+  @Prop({ type: Boolean, default: false }) private readonly countable!: boolean;
+  @Prop({ type: Boolean, default: false }) private readonly sortable!: boolean;
   @Prop({ type: String, default: 'No matching records found' }) private readonly noResultsText!: string;
   @Prop({ type: String, default: 'No data to display' }) private readonly noDataText!: string;
 
@@ -127,9 +134,17 @@ export default class Table extends Vue {
   tablesModel: Array<VTable> = [];
 
   created() {
+    // Clone data
     this.tablesModel = copyDeep<VTable[]>(this.tables);
+
+    // Add count column and number count: number for each row in table
+    if (this.countable) this.addCount()
+
+    // Sort columns by order
     this.tablesModel.forEach(table => table.headers.sort((a, b) => a.order - b.order));
-    this.tablesModel.forEach(table => table.headers.forEach(header => header.sort_dir = 'asc'));
+
+    // Add default sort_dir: 'asc' for sorting
+    if (this.sortable) this.addSortDir()
   }
 
   get isNoData(): boolean {
@@ -158,7 +173,7 @@ export default class Table extends Vue {
   }
 
   get sortedItems(): Row[] {
-    if (this.currentColumnName) {
+    if (this.currentColumnName && this.sortable) {
       return this.filteredItems.sort((a, b) => {
         const modifier = this.currentColumnDir === 'asc' ? 1 : -1;
 
@@ -173,19 +188,32 @@ export default class Table extends Vue {
     return this.filteredItems;
   }
 
+  addCount(): void {
+    this.tablesModel.forEach(table => table.headers.push({ text: '№', row_key: 'count', order: 0 }));
+    this.tablesModel.forEach(table => table.rows.forEach((row, index) => row.count = `${index + 1}`));
+  }
+
+  addSortDir() {
+    this.tablesModel.forEach(table => table.headers.forEach(header => header.sort_dir = 'asc'));
+  }
+
   findColForSort(): Header {
     return this.tablesModel[this.tab].headers
       .find(header => header.row_key === this.currentColumnName)!;
   }
 
   sortBy(colName: string) {
-    this.currentColumnName = colName;
-    this.currentColumnDir = this.findColForSort()!.sort_dir;
+    if (this.sortable) {
+      this.currentColumnName = colName;
+      this.currentColumnDir = this.findColForSort()!.sort_dir;
+    }
   }
 
   changeSortDirForCurCol(colName: string, dir: SortDir) {
-    this.currentColumnName = colName;
-    this.findColForSort()!.sort_dir = dir;
+    if (this.sortable) {
+      this.currentColumnName = colName;
+      this.findColForSort()!.sort_dir = dir;
+    }
   }
 }
 </script>
@@ -270,11 +298,19 @@ export default class Table extends Vue {
         padding: 10px;
         position: relative;
         background-color: #0277BD;
-        cursor: pointer;
         overflow: hidden;
 
         &:not(:last-child) {
           border-right: 1px solid rgba(#fafafa, 0.12);
+        }
+
+        &.active {
+          color: #fafafa;
+          text-decoration: underline;
+        }
+
+        &.pointer {
+          cursor: pointer;
         }
 
         .sort-buttons {
@@ -315,11 +351,6 @@ export default class Table extends Vue {
               color: #0277BD;
             }
           }
-        }
-
-        &.active {
-          color: #fafafa;
-          text-decoration: underline;
         }
       }
 
