@@ -124,6 +124,7 @@ export default class Table extends Vue {
   }) private readonly tables!: Array<VTable>;
   @Prop({ type: String, default: '' }) private readonly search!: string;
   @Prop({ type: Boolean, default: false }) private readonly countable!: boolean;
+  @Prop({ type: Boolean, default: false }) private readonly ordered!: boolean;
   @Prop({ type: Boolean, default: false }) private readonly sortable!: boolean;
   @Prop({ type: String, default: 'No matching records found' }) private readonly noResultsText!: string;
   @Prop({ type: String, default: 'No data to display' }) private readonly noDataText!: string;
@@ -134,17 +135,30 @@ export default class Table extends Vue {
   tablesModel: Array<VTable> = [];
 
   created() {
-    // Clone data
+    // 1. Clone data
     this.tablesModel = copyDeep<VTable[]>(this.tables);
 
-    // Add count column and number count: number for each row in table
+    // 2. OPTIONAL Add count column and number {count: number} for each row in table
     if (this.countable) this.addCount()
 
-    // Sort columns by order
-    this.tablesModel.forEach(table => table.headers.sort((a, b) => a.order - b.order));
+    // 3. OPTIONAL Sort columns by order
+    if (this.ordered) this.sortColumnsByOrder()
 
-    // Add default sort_dir: 'asc' for sorting
+    // 4. OPTIONAL Add default {sort_dir: 'asc'} for sorting
     if (this.sortable) this.addSortDir()
+  }
+
+  addCount(): void {
+    this.tablesModel.forEach(table => table.headers.push({ text: '№', row_key: 'count', order: 0 }));
+    this.tablesModel.forEach(table => table.rows.forEach((row, index) => row.count = `${index + 1}`));
+  }
+
+  sortColumnsByOrder() {
+    this.tablesModel.forEach(table => table.headers.sort((a, b) => a.order - b.order));
+  }
+
+  addSortDir() {
+    this.tablesModel.forEach(table => table.headers.forEach(header => header.sort_dir = 'asc'));
   }
 
   get isNoData(): boolean {
@@ -186,15 +200,6 @@ export default class Table extends Vue {
       });
     }
     return this.filteredItems;
-  }
-
-  addCount(): void {
-    this.tablesModel.forEach(table => table.headers.push({ text: '№', row_key: 'count', order: 0 }));
-    this.tablesModel.forEach(table => table.rows.forEach((row, index) => row.count = `${index + 1}`));
-  }
-
-  addSortDir() {
-    this.tablesModel.forEach(table => table.headers.forEach(header => header.sort_dir = 'asc'));
   }
 
   findColForSort(): Header {

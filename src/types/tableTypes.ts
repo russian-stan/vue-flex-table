@@ -3,7 +3,7 @@ export type SortDir = 'asc' | 'desc';
 export interface Header {
   text: string;
   row_key: string;
-  order: number;
+  order?: number;
   sort_dir: SortDir;
 }
 

@@ -4,14 +4,17 @@
       Search
       <input v-model.trim="search" type="text" style="margin-bottom: 20px; width: 200px">
     </label>
+
     <VFTable
      :tables="data.tables"
      :search="search"
      countable
+     ordered
      sortable
      no-results-text="No matching records found"
      no-data-text="No data to display"
     />
+
   </div>
 </template>
 
