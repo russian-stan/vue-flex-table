@@ -4,7 +4,7 @@
       Search
       <input v-model.trim="search" type="text" style="margin-bottom: 20px; width: 200px">
     </label>
-    <Table
+    <VFTable
       :tables="data.tables"
      :search="search"
      no-results-text="No matching records found"
@@ -15,11 +15,11 @@
 
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator';
-import Table from './components/Table.vue';
+import VFTable from './components/VFTable.vue';
 
 @Component({
   components: {
-    Table,
+    VFTable,
   },
 })
 export default class App extends Vue {

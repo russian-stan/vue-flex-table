@@ -15,16 +15,14 @@
       </div>
 
       <table>
-        <colgroup
-         v-if="tables[tab].headers && tables[tab].headers.length"
-        >
+        <colgroup v-if="!isNoHeaders">
           <col
            v-for="header in tablesModel[tab].headers"
            :key="header.row_key"
           >
         </colgroup>
 
-        <thead v-if="tables[tab].headers && tables[tab].headers.length">
+        <thead v-if="!isNoHeaders">
         <draggable
          tag="tr"
          v-model="tablesModel[tab].headers"
@@ -138,6 +136,10 @@ export default class Table extends Vue {
     return !Boolean(this.tables[this.tab].rows?.length);
   }
 
+  get isNoHeaders(): boolean {
+    return !Boolean(this.tables[this.tab].headers?.length);
+  }
+
   get rowKeys(): Array<string> {
     return this.tablesModel[this.tab].headers.reduce((acc: Array<string>, header: Header) => {
       const prop = Object.keys(header).find(prop => prop === 'row_key');
@@ -196,153 +198,153 @@ export default class Table extends Vue {
 
   .vf-table {
     width: 100%;
-  }
 
-  .table-wrapper {
-    width: 100%;
-  }
-
-  .table-tabs {
-    display: flex;
-    align-items: center;
-  }
-
-  .table-tab {
-    position: relative;
-    border: 1px solid rgba(#0277BD, 0.3);
-    background-color: #fafafa;
-    color: #0277BD;
-    font-family: inherit;
-    font-size: 14px;
-    text-transform: uppercase;
-    border-radius: 0;
-    cursor: pointer;
-    width: 50%;
-    padding: 10px;
-    outline: none;
-    overflow: hidden;
-    transition: all 0.25s ease-in-out;
-
-    &.active {
-      background-color: rgba(#0277BD, 0.4);
+    .table-wrapper {
+      width: 100%;
     }
 
-    &:hover {
-      background-color: rgba(#0277BD, 0.2);
+    .table-tabs {
+      display: flex;
+      align-items: center;
     }
 
-    &:after {
-      content: "";
-      background: #fafafa;
-      display: block;
-      position: absolute;
-      padding-top: 300%;
-      padding-left: 350%;
-      margin-left: -20px !important;
-      margin-top: -120%;
-      opacity: 0;
-      transition: all 0.8s
-    }
-
-    &:active:after {
-      padding: 0;
-      margin: 0;
-      opacity: 1;
-      transition: 0s
-    }
-  }
-
-  table {
-    border-collapse: collapse;
-    width: 100%;
-
-    thead {
-      color: #fafafa;
-    }
-
-    tbody {
-      border: solid 1px rgba(0, 0, 0, 0.12);
-      background-color: #ffffff;
-    }
-
-    th {
-      padding: 10px;
+    .table-tab {
       position: relative;
-      background-color: #0277BD;
+      border: 1px solid rgba(#0277BD, 0.3);
+      background-color: #fafafa;
+      color: #0277BD;
+      font-family: inherit;
+      font-size: 14px;
+      text-transform: uppercase;
+      border-radius: 0;
       cursor: pointer;
+      width: 50%;
+      padding: 10px;
+      outline: none;
       overflow: hidden;
-
-      &:not(:last-child) {
-        border-right: 1px solid rgba(#fafafa, 0.12);
-      }
-
-      .sort-buttons {
-        position: absolute;
-        top: 50%;
-        margin-top: calc(-25px / 2);
-        right: 2px;
-        width: 25px;
-        height: 25px;
-        display: flex;
-        flex-direction: column;
-        justify-content: space-between;
-      }
-
-      .sort-btn {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        width: 25px;
-        height: 10px;
-        outline: none;
-        margin: 0;
-        padding: 0;
-        border: none;
-        cursor: pointer;
-        background-color: #fafafa;
-        transition: all 0.25s ease-in-out;
-
-        &:hover {
-          background-color: #e7dddd;
-        }
-
-        .material-icons {
-          line-height: 10px;
-          color: rgba(#0277BD, 0.4);
-
-          &.active {
-            color: #0277BD;
-          }
-        }
-      }
+      transition: all 0.25s ease-in-out;
 
       &.active {
+        background-color: rgba(#0277BD, 0.4);
+      }
+
+      &:hover {
+        background-color: rgba(#0277BD, 0.2);
+      }
+
+      &:after {
+        content: "";
+        background: #fafafa;
+        display: block;
+        position: absolute;
+        padding-top: 300%;
+        padding-left: 350%;
+        margin-left: -20px !important;
+        margin-top: -120%;
+        opacity: 0;
+        transition: all 0.8s
+      }
+
+      &:active:after {
+        padding: 0;
+        margin: 0;
+        opacity: 1;
+        transition: 0s
+      }
+    }
+
+    table {
+      border-collapse: collapse;
+      width: 100%;
+
+      thead {
         color: #fafafa;
-        text-decoration: underline;
+      }
+
+      tbody {
+        border: solid 1px rgba(0, 0, 0, 0.12);
+        background-color: #ffffff;
+      }
+
+      th {
+        padding: 10px;
+        position: relative;
+        background-color: #0277BD;
+        cursor: pointer;
+        overflow: hidden;
+
+        &:not(:last-child) {
+          border-right: 1px solid rgba(#fafafa, 0.12);
+        }
+
+        .sort-buttons {
+          position: absolute;
+          top: 50%;
+          margin-top: calc(-25px / 2);
+          right: 2px;
+          width: 25px;
+          height: 25px;
+          display: flex;
+          flex-direction: column;
+          justify-content: space-between;
+        }
+
+        .sort-btn {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          width: 25px;
+          height: 10px;
+          outline: none;
+          margin: 0;
+          padding: 0;
+          border: none;
+          cursor: pointer;
+          background-color: #fafafa;
+          transition: all 0.25s ease-in-out;
+
+          &:hover {
+            background-color: #e7dddd;
+          }
+
+          .material-icons {
+            line-height: 10px;
+            color: rgba(#0277BD, 0.4);
+
+            &.active {
+              color: #0277BD;
+            }
+          }
+        }
+
+        &.active {
+          color: #fafafa;
+          text-decoration: underline;
+        }
+      }
+
+      td {
+        padding: 5px;
+
+        &:not(:last-child) {
+          border-right: 1px solid rgba(#000000, 0.12);
+        }
+
+        &.no-match {
+          padding: 20px;
+        }
+      }
+
+      th, td {
+        text-align: center;
+        font-size: 14px;
+
       }
     }
 
-    td {
-      padding: 5px;
-
-      &:not(:last-child) {
-        border-right: 1px solid rgba(#000000, 0.12);
-      }
-
-      &.no-match {
-        padding: 20px;
-      }
+    tbody tr:nth-of-type(odd) {
+      background-color: rgba(#0277BD, 0.05);
     }
-
-    th, td {
-      text-align: center;
-      font-size: 14px;
-
-    }
-  }
-
-  tbody tr:nth-of-type(odd) {
-    background-color: rgba(#0277BD, 0.05);
   }
 
 </style>
