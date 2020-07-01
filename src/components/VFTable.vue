@@ -162,7 +162,7 @@ export default class VFTable extends Vue {
   sortColumnsByOrder(): void {
     this.tablesModel.forEach(table => table.headers.sort((a, b) => {
       if (a.hasOwnProperty('order') && b.hasOwnProperty('order')) {
-        return a.order! - b.order!
+        return a.order! - b.order!;
       } else {
         return 0;
       }
@@ -199,7 +199,7 @@ export default class VFTable extends Vue {
   }
 
   get sortedItems(): Row[] {
-    if (this.currentColumnName && this.sortable) {
+    if (this.sortable && this.rowKeys.includes(this.currentColumnName) && this.currentColumnName) {
       return this.filteredItems.sort((a, b) => {
         const modifier = this.currentColumnDir === 'asc' ? 1 : -1;
 
