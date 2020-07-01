@@ -1,18 +1,16 @@
 export type SortDir = 'asc' | 'desc';
+export type ColType = 'text' | 'number' | 'date' | 'option';
 
 export interface Header {
   text: string;
   row_key: string;
   order?: number;
   sort_dir?: SortDir;
+  col_type?: ColType
 }
 
 export interface Row {
-  brand: string;
-  color: string;
-  type: string;
-  year: string;
-  uid: string;
+  [key: string]: string | number;
   count?: string;
 }
 

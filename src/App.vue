@@ -54,6 +54,12 @@ export default class App extends Vue {
             row_key: 'year',
             order: 4,
           },
+          {
+            text: 'Price',
+            row_key: 'price',
+            order: 5,
+            col_type: 'number'
+          },
         ],
         rows: [
           {
@@ -61,6 +67,7 @@ export default class App extends Vue {
             color: 'silver',
             type: 'sedan',
             year: '2015',
+            price: '20000',
             uid: '1',
           },
           {
@@ -68,6 +75,7 @@ export default class App extends Vue {
             color: 'red',
             type: 'hatchback',
             year: '2014',
+            price: '25000',
             uid: '2',
           },
           {
@@ -75,6 +83,7 @@ export default class App extends Vue {
             color: 'black',
             type: 'sedan',
             year: '2014',
+            price: '50000',
             uid: '3',
           },
           {
@@ -82,6 +91,7 @@ export default class App extends Vue {
             color: 'white',
             type: 'sedan',
             year: '2009',
+            price: '55000',
             uid: '4',
           },
         ],

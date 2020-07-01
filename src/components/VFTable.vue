@@ -30,10 +30,7 @@
           <th
            v-for="header in tablesModel[tab].headers"
            :key="header.row_key"
-           :class="{
-             'active': header.row_key === currentColumnName,
-             'pointer': sortable
-           }"
+           :class="{'active': header.row_key === currentColumnName,'pointer': sortable}"
            @click="sortable ? sortBy(header.row_key) : null"
           >
             {{header.text}}
@@ -83,7 +80,15 @@
            v-for="key in rowKeys"
            :key="key"
           >
-            {{row[key]}}
+            <input
+             v-if="findColType(key) === 'number'"
+             class="input-number"
+             type="number"
+             v-model="row[key]"
+            >
+            <template v-else>
+              {{row[key]}}
+            </template>
           </td>
         </tr>
         </tbody>
@@ -102,7 +107,7 @@
 
 <script lang="ts">
 import { Component, Prop, Vue } from 'vue-property-decorator';
-import { VTable, Header, Row, SortDir } from '@/types/tableTypes';
+import { ColType, Header, Row, SortDir, VTable } from '@/types/tableTypes';
 import { copyDeep } from '@/helpers/copyDeep';
 import draggable from 'vuedraggable';
 
@@ -111,7 +116,7 @@ import draggable from 'vuedraggable';
     draggable,
   },
 })
-export default class Table extends Vue {
+export default class VFTable extends Vue {
   @Prop({
     type: Array, default() {
       return [
@@ -145,19 +150,20 @@ export default class Table extends Vue {
     if (this.ordered) this.sortColumnsByOrder();
 
     // 4. OPTIONAL: Add default {sort_dir: 'asc'} for sorting
-    if (this.sortable) this.addSortDir();
+    if (this.sortable) this.addSortDirToRow();
   }
 
   addCount(): void {
-    this.tablesModel.forEach(table => table.headers.push({ text: '№', row_key: 'count', order: 0 }));
+    const order = this.ordered ? { order: 0 } : {};
+    this.tablesModel.forEach(table => table.headers.push({ text: '№', row_key: 'count', ...order }));
     this.tablesModel.forEach(table => table.rows.forEach((row, index) => row.count = `${index + 1}`));
   }
 
-  sortColumnsByOrder() {
+  sortColumnsByOrder(): void {
     this.tablesModel.forEach(table => table.headers.sort((a, b) => a!.order - b!.order));
   }
 
-  addSortDir() {
+  addSortDirToRow(): void {
     this.tablesModel.forEach(table => table.headers.forEach(header => header.sort_dir = 'asc'));
   }
 
@@ -191,8 +197,8 @@ export default class Table extends Vue {
       return this.filteredItems.sort((a, b) => {
         const modifier = this.currentColumnDir === 'asc' ? 1 : -1;
 
-        const x = a[this.currentColumnName as keyof Row]!.trim().toLowerCase();
-        const y = b[this.currentColumnName as keyof Row]!.trim().toLowerCase();
+        const x = a[this.currentColumnName as keyof Row]!.toString().trim().toLowerCase();
+        const y = b[this.currentColumnName as keyof Row]!.toString().trim().toLowerCase();
 
         if (x < y) return -1 * modifier;
         if (x > y) return 1 * modifier;
@@ -219,6 +225,11 @@ export default class Table extends Vue {
       this.currentColumnName = colName;
       this.findColForSort()!.sort_dir = dir;
     }
+  }
+
+  findColType(key: string): ColType | undefined {
+    const row = this.tablesModel[this.tab].headers.find(col => col.row_key === key);
+    return row.hasOwnProperty('col_type') ? row!['col_type'] : undefined;
   }
 }
 </script>
