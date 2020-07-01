@@ -123,11 +123,11 @@ export default class Table extends Vue {
     },
   }) private readonly tables!: Array<VTable>;
   @Prop({ type: String, default: '' }) private readonly search!: string;
-  @Prop({ type: Boolean, default: false }) private readonly countable!: boolean;
   @Prop({ type: Boolean, default: false }) private readonly ordered!: boolean;
   @Prop({ type: Boolean, default: false }) private readonly sortable!: boolean;
-  @Prop({ type: String, default: 'No matching records found' }) private readonly noResultsText!: string;
+  @Prop({ type: Boolean, default: false }) private readonly countable!: boolean;
   @Prop({ type: String, default: 'No data to display' }) private readonly noDataText!: string;
+  @Prop({ type: String, default: 'No matching records found' }) private readonly noResultsText!: string;
 
   tab = 0;
   currentColumnName = '';
@@ -138,14 +138,14 @@ export default class Table extends Vue {
     // 1. Clone data
     this.tablesModel = copyDeep<VTable[]>(this.tables);
 
-    // 2. OPTIONAL Add count column and number {count: number} for each row in table
-    if (this.countable) this.addCount()
+    // 2. OPTIONAL: Add count column and number {count: number} for each row in table
+    if (this.countable) this.addCount();
 
-    // 3. OPTIONAL Sort columns by order
-    if (this.ordered) this.sortColumnsByOrder()
+    // 3. OPTIONAL: Sort columns by order
+    if (this.ordered) this.sortColumnsByOrder();
 
-    // 4. OPTIONAL Add default {sort_dir: 'asc'} for sorting
-    if (this.sortable) this.addSortDir()
+    // 4. OPTIONAL: Add default {sort_dir: 'asc'} for sorting
+    if (this.sortable) this.addSortDir();
   }
 
   addCount(): void {
