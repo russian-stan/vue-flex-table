@@ -30,14 +30,14 @@
           <th
            v-for="header in tablesModel[tab].headers"
            :key="header.row_key"
-           :class="{'active': header.row_key === currentColumnName,'pointer': sortable}"
+           :class="{'active': header.row_key === currentColumnName[tab],'pointer': sortable}"
            @click="sortable ? sortBy(header.row_key) : null"
           >
             {{header.text}}
 
             <div
              v-if="sortable
-             && currentColumnName === header.row_key
+             && currentColumnName[tab] === header.row_key
              && filteredItems.length > 1"
              class="sort-buttons"
             >
@@ -135,7 +135,7 @@ export default class VFTable extends Vue {
   @Prop({ type: String, default: 'No matching records found' }) private readonly noResultsText!: string;
 
   tab = 0;
-  currentColumnName = '';
+  currentColumnName: string[] = [];
   currentColumnDir: SortDir = 'asc';
   tablesModel: Array<VTable> = [];
 
@@ -199,12 +199,12 @@ export default class VFTable extends Vue {
   }
 
   get sortedItems(): Row[] {
-    if (this.sortable && this.rowKeys.includes(this.currentColumnName) && this.currentColumnName) {
+    if (this.sortable && this.rowKeys.includes(this.currentColumnName[this.tab]) && this.currentColumnName[this.tab]) {
       return this.filteredItems.sort((a, b) => {
         const modifier = this.currentColumnDir === 'asc' ? 1 : -1;
 
-        const x = a[this.currentColumnName as keyof Row]!.toString().trim().toLowerCase();
-        const y = b[this.currentColumnName as keyof Row]!.toString().trim().toLowerCase();
+        const x = a[this.currentColumnName[this.tab] as keyof Row]!.toString().trim().toLowerCase();
+        const y = b[this.currentColumnName[this.tab] as keyof Row]!.toString().trim().toLowerCase();
 
         if (x < y) return -1 * modifier;
         if (x > y) return 1 * modifier;
@@ -216,19 +216,19 @@ export default class VFTable extends Vue {
 
   findColForSort(): Header {
     return this.tablesModel[this.tab].headers
-      .find(header => header.row_key === this.currentColumnName)!;
+      .find(header => header.row_key === this.currentColumnName[this.tab])!;
   }
 
   sortBy(colName: string) {
     if (this.sortable) {
-      this.currentColumnName = colName;
+      this.$set(this.currentColumnName, this.tab, colName);
       this.currentColumnDir = this.findColForSort()!.sort_dir || 'asc';
     }
   }
 
   changeSortDirForCurCol(colName: string, dir: SortDir) {
     if (this.sortable) {
-      this.currentColumnName = colName;
+      this.currentColumnName[this.tab] = colName;
       this.findColForSort()!.sort_dir = dir;
     }
   }
