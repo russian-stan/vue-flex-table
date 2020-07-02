@@ -7,6 +7,7 @@ export interface Header {
   order?: number;
   sort_dir?: SortDir;
   sortable?: boolean;
+  filterable?: boolean;
   col_type?: ColType;
 }
 

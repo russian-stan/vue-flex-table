@@ -35,10 +35,25 @@
           >
             {{header.text}}
 
-            <!--FILTER-DIALOG-->
-            <button class="filter-btn">
-              <i class="material-icons">filter_list</i>
-            </button>
+            <!--FILTER-DROPDOWN-->
+            <template v-if="header.filterable">
+              <button
+               class="filter-btn"
+               @click="toggleDropDown(header.row_key)">
+                <i class="material-icons">search</i>
+              </button>
+              <div
+               v-show="filterDropdown
+             && currentFilterName[tab] === header.row_key"
+               class="filter-dropdown"
+              >
+                <input
+                 class="table-input table-input--filter"
+                 placeholder="search in column..."
+                 type="text"
+                >
+              </div>
+            </template>
 
             <div
              v-if="header.sortable
@@ -171,9 +186,11 @@ export default class VFTable extends Vue {
   @Prop({ type: String, default: 'No matching records found' }) private readonly noResultsText!: string;
 
   tab = 0;
+  currentFilterName: string[] = [];
   currentColumnName: string[] = [];
   currentColumnDir: SortDir = 'asc';
   tablesModel: Array<VTable> = [];
+  filterDropdown = false;
 
   created() {
     // 1. Clone data
@@ -270,6 +287,14 @@ export default class VFTable extends Vue {
     this.findColForSort()!.sort_dir = dir;
   }
 
+  toggleDropDown(colName: string): void {
+    this.filterDropdown = !this.filterDropdown;
+    if (this.currentFilterName[this.tab] !== colName) {
+      this.$set(this.currentFilterName, this.tab, colName);
+      this.filterDropdown = true;
+    }
+  }
+
   findColType(key: string): ColType | undefined {
     const row = this.tablesModel[this.tab].headers.find(col => col.row_key === key);
     if (row) return row.hasOwnProperty('col_type') ? row['col_type'] : undefined;
@@ -358,6 +383,7 @@ export default class VFTable extends Vue {
         padding: 10px;
         position: relative;
         background-color: #0277BD;
+        font-weight: normal;
 
         &:not(:last-child) {
           border-right: 1px solid rgba(#fafafa, 0.12);
@@ -399,6 +425,25 @@ export default class VFTable extends Vue {
             font-size: 14px;
             line-height: 14px;
             color: #fafafa;
+          }
+        }
+
+        .filter-dropdown {
+          position: absolute;
+          top: 37px;
+          left: 0;
+          width: 200px;
+          height: 50px;
+          background-color: #fafafa;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          box-shadow: 0 3px 6px rgba(0, 0, 0, 0.16),
+                      0 3px 6px rgba(0, 0, 0, 0.23);
+          z-index: 10;
+
+          .filter-input {
+
           }
         }
 
@@ -477,7 +522,6 @@ export default class VFTable extends Vue {
       border: 1px solid rgba(#0277BD, 0.5);
       max-width: 170px;
       height: 28px;
-      color: inherit;
 
       &:focus {
         outline: 2px solid #0277BD;
@@ -493,6 +537,11 @@ export default class VFTable extends Vue {
       }
 
       &--select {
+        cursor: pointer;
+      }
+
+      &--filter {
+        text-align: left;
       }
     }
   }

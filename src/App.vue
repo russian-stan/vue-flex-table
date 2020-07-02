@@ -47,6 +47,7 @@ export default class App extends Vue {
             text: 'Brand',
             row_key: 'brand',
             sortable: true,
+            filterable: true,
             order: 1,
           },
           {
@@ -54,6 +55,7 @@ export default class App extends Vue {
             row_key: 'color',
             col_type: 'select',
             sortable: true,
+            filterable: true,
             order: 2,
           },
           {
@@ -61,6 +63,7 @@ export default class App extends Vue {
             row_key: 'type',
             sortable: true,
             col_type: 'text',
+            filterable: true,
             order: 3,
           },
           {
@@ -74,6 +77,7 @@ export default class App extends Vue {
             text: 'Price',
             row_key: 'price',
             sortable: true,
+            filterable: true,
             col_type: 'number',
             order: 5,
           },
