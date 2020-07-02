@@ -95,13 +95,14 @@
             >
 
             <select
-             v-else-if="findColType(key) === 'select'"
+             v-else-if="findColType(key) === 'select' && selectsData[key]"
              class="table-input table-input--select"
              v-model="row[key]"
             >
               <option disabled value="">Choice an option</option>
               <option
                v-for="option in selectsData[key]"
+               :value="option.id"
               >
                 {{option.text}}
               </option>
@@ -158,7 +159,7 @@ export default class VFTable extends Vue {
   }) private readonly tables!: Array<VTable>;
   @Prop({
     type: Object, default() {
-      return []
+      return {}
     },
   }) private readonly selectsData!: SelectsData;
   @Prop({ type: String, default: '' }) private readonly search!: string;

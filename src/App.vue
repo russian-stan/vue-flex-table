@@ -81,7 +81,7 @@ export default class App extends Vue {
         rows: [
           {
             brand: 'Ford',
-            color: 'silver',
+            color: '1',
             type: 'sedan',
             issue_date: '2015-01-02',
             price: '20000',
@@ -89,7 +89,7 @@ export default class App extends Vue {
           },
           {
             brand: 'Mazda',
-            color: 'red',
+            color: '2',
             type: 'hatchback',
             issue_date: '2018-01-02',
             price: '50000',
@@ -97,7 +97,7 @@ export default class App extends Vue {
           },
           {
             brand: 'BMW',
-            color: 'black',
+            color: '3',
             type: 'sedan',
             issue_date: '2013-01-02',
             price: '25000',
@@ -105,7 +105,7 @@ export default class App extends Vue {
           },
           {
             brand: 'Audi',
-            color: 'white',
+            color: '4',
             type: 'sedan',
             issue_date: '2017-01-02',
             price: '55000',
