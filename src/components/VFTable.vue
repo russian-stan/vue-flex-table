@@ -31,9 +31,14 @@
            v-for="header in tablesModel[tab].headers"
            :key="header.row_key"
            :class="{'active': header.sortable && header.row_key === currentColumnName[tab], 'pointer': header.sortable}"
-           @click.stop="header.sortable ? sortBy(header.row_key) : null"
+           @click.self="header.sortable ? sortBy(header.row_key) : null"
           >
             {{header.text}}
+
+            <!--FILTER-DIALOG-->
+            <button class="filter-btn">
+              <i class="material-icons">filter_list</i>
+            </button>
 
             <div
              v-if="header.sortable
@@ -100,10 +105,7 @@
              v-model="row[key]"
             >
               <option disabled value="">Choice an option</option>
-              <option
-               v-for="option in selectsData[key]"
-               :value="option.id"
-              >
+              <option v-for="option in selectsData[key]" :value="option.id">
                 {{option.text}}
               </option>
             </select>
@@ -356,7 +358,6 @@ export default class VFTable extends Vue {
         padding: 10px;
         position: relative;
         background-color: #0277BD;
-        overflow: hidden;
 
         &:not(:last-child) {
           border-right: 1px solid rgba(#fafafa, 0.12);
@@ -369,6 +370,36 @@ export default class VFTable extends Vue {
 
         &.pointer {
           cursor: pointer;
+        }
+
+        .filter-btn {
+          position: absolute;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          top: 0;
+          left: 0;
+          height: 36px;
+          background-color: transparent;
+          border: 0;
+          cursor: pointer;
+          transition: all 0.25s ease-in-out;
+          outline: none;
+          z-index: 1;
+
+          &:hover {
+            background-color: rgba(#000000, 0.1);
+          }
+
+          &:focus {
+            background-color: rgba(#000000, 0.1);
+          }
+
+          i {
+            font-size: 14px;
+            line-height: 14px;
+            color: #fafafa;
+          }
         }
 
         .sort-buttons {
@@ -388,25 +419,28 @@ export default class VFTable extends Vue {
           align-items: center;
           justify-content: center;
           width: 25px;
-          height: 10px;
+          height: 12px;
           outline: none;
           margin: 0;
           padding: 0;
-          border: none;
+          border: 0;
           cursor: pointer;
-          background-color: #fafafa;
+          background: transparent;
           transition: all 0.25s ease-in-out;
 
           &:hover {
-            background-color: #e7dddd;
+            .material-icons {
+              color: #e7dddd;
+            }
           }
 
           .material-icons {
-            line-height: 10px;
-            color: rgba(#0277BD, 0.4);
+            line-height: 12px;
+            font-size: 25px;
+            color: rgba(#000000, 0.2);
 
             &.active {
-              color: #0277BD;
+              color: #fafafa;
             }
           }
         }
