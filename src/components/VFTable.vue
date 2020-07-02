@@ -82,10 +82,25 @@
           >
             <input
              v-if="findColType(key) === 'number'"
-             class="input-number"
+             class="table-input table-input--number"
              type="number"
              v-model="row[key]"
             >
+
+            <input
+             v-else-if="findColType(key) === 'text'"
+             class="table-input table-input--text"
+             type="text"
+             v-model="row[key]"
+            >
+
+            <input
+             v-else-if="findColType(key) === 'date'"
+             class="table-input table-input--date"
+             type="date"
+             v-model="row[key]"
+            >
+
             <template v-else>
               {{row[key]}}
             </template>
@@ -235,11 +250,8 @@ export default class VFTable extends Vue {
 
   findColType(key: string): ColType | undefined {
     const row = this.tablesModel[this.tab].headers.find(col => col.row_key === key);
-    if (row) {
-      return row.hasOwnProperty('col_type') ? row['col_type'] : undefined;
-    } else {
-      return undefined;
-    }
+    if (row) return row.hasOwnProperty('col_type') ? row['col_type'] : undefined;
+    return undefined;
   }
 }
 </script>
@@ -401,6 +413,22 @@ export default class VFTable extends Vue {
 
     tbody tr:nth-of-type(odd) {
       background-color: rgba(#0277BD, 0.05);
+    }
+
+    .table-input {
+      outline: none;
+      padding: 5px;
+      text-align: center;
+      border: 1px solid rgba(#0277BD, 0.5);
+      max-width: 170px;
+
+      &:focus {
+        outline: 2px solid #0277BD;
+      }
+
+      &--number {}
+      &--ntext {}
+      &--date {}
     }
   }
 
