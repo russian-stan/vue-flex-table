@@ -394,6 +394,7 @@ export default class VFTable extends Vue {
 
       td {
         padding: 5px;
+        line-height: 28px;
 
         &:not(:last-child) {
           border-right: 1px solid rgba(#000000, 0.12);
@@ -421,6 +422,7 @@ export default class VFTable extends Vue {
       text-align: center;
       border: 1px solid rgba(#0277BD, 0.5);
       max-width: 170px;
+      height: 28px;
       color: inherit;
 
       &:focus {
