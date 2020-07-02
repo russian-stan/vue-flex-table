@@ -405,9 +405,9 @@ export default class VFTable extends Vue {
       }
 
       th, td {
+        min-width: 90px;
         text-align: center;
         font-size: 14px;
-
       }
     }
 
@@ -421,6 +421,7 @@ export default class VFTable extends Vue {
       text-align: center;
       border: 1px solid rgba(#0277BD, 0.5);
       max-width: 170px;
+      color: inherit;
 
       &:focus {
         outline: 2px solid #0277BD;
