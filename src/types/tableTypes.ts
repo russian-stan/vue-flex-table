@@ -1,5 +1,5 @@
 export type SortDir = 'asc' | 'desc';
-export type ColType = 'text' | 'number' | 'date' | 'option';
+export type ColType = 'text' | 'number' | 'date' | 'select';
 
 export interface Header {
   text: string;
@@ -18,4 +18,11 @@ export interface VTable {
   label: string;
   headers: Header[];
   rows: Row[];
+}
+
+export interface SelectsData {
+  [key: string]: {
+    text: string;
+    id: string;
+  }[];
 }

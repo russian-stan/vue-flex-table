@@ -94,6 +94,19 @@
              v-model="row[key]"
             >
 
+            <select
+             v-else-if="findColType(key) === 'select'"
+             class="table-input table-input--select"
+             v-model="row[key]"
+            >
+              <option disabled value="">Choice an option</option>
+              <option
+               v-for="option in selectsData[key]"
+              >
+                {{option.text}}
+              </option>
+            </select>
+
             <input
              v-else-if="findColType(key) === 'date'"
              class="table-input table-input--date"
@@ -122,7 +135,7 @@
 
 <script lang="ts">
 import { Component, Prop, Vue } from 'vue-property-decorator';
-import { ColType, Header, Row, SortDir, VTable } from '@/types/tableTypes';
+import { ColType, Header, Row, SortDir, SelectsData, VTable } from '@/types/tableTypes';
 import { copyDeep } from '@/helpers/copyDeep';
 import draggable from 'vuedraggable';
 
@@ -136,12 +149,18 @@ export default class VFTable extends Vue {
     type: Array, default() {
       return [
         {
+          label: '',
           headers: [],
           rows: [],
         },
       ]
     },
   }) private readonly tables!: Array<VTable>;
+  @Prop({
+    type: Object, default() {
+      return []
+    },
+  }) private readonly selectsData!: SelectsData;
   @Prop({ type: String, default: '' }) private readonly search!: string;
   @Prop({ type: Boolean, default: false }) private readonly ordered!: boolean;
   @Prop({ type: Boolean, default: false }) private readonly countable!: boolean;
@@ -429,9 +448,17 @@ export default class VFTable extends Vue {
         outline: 2px solid #0277BD;
       }
 
-      &--number {}
-      &--ntext {}
-      &--date {}
+      &--number {
+      }
+
+      &--ntext {
+      }
+
+      &--date {
+      }
+
+      &--select {
+      }
     }
   }
 

@@ -7,6 +7,7 @@
 
     <VFTable
      :tables="data.tables"
+     :selectsData="data.selects_data"
      :search="search"
      countable
      ordered
@@ -29,6 +30,15 @@ import VFTable from './components/VFTable.vue';
 export default class App extends Vue {
   search = '';
   data = {
+    selects_data: {
+      color: [
+        { text: 'red', id: '1' },
+        { text: 'black', id: '2' },
+        { text: 'silver', id: '3' },
+        { text: 'white', id: '4' },
+        { text: 'blue', id: '5' },
+      ],
+    },
     tables: [
       {
         label: 'Used cars',
@@ -42,6 +52,8 @@ export default class App extends Vue {
           {
             text: 'Color',
             row_key: 'color',
+            col_type: 'select',
+            sortable: true,
             order: 2,
           },
           {
