@@ -30,13 +30,13 @@
           <th
            v-for="header in tablesModel[tab].headers"
            :key="header.row_key"
-           :class="{'active': header.row_key === currentColumnName[tab],'pointer': sortable}"
-           @click="sortable ? sortBy(header.row_key) : null"
+           :class="{'active': header.sortable && header.row_key === currentColumnName[tab], 'pointer': header.sortable}"
+           @click.stop="header.sortable ? sortBy(header.row_key) : null"
           >
             {{header.text}}
 
             <div
-             v-if="sortable
+             v-if="header.sortable
              && currentColumnName[tab] === header.row_key
              && filteredItems.length > 1"
              class="sort-buttons"
@@ -44,7 +44,7 @@
               <!--ASC-BTN-->
               <button
                class="sort-btn"
-               @click="changeSortDirForCurCol(header.row_key, 'asc')"
+               @click="header.sortable ? changeSortDirForCurCol(header.row_key, 'asc') : null"
               >
                 <i
                  class="material-icons"
@@ -57,7 +57,7 @@
               <!--DESC-BTN-->
               <button
                class="sort-btn"
-               @click="changeSortDirForCurCol(header.row_key, 'desc')"
+               @click="header.sortable ? changeSortDirForCurCol(header.row_key, 'desc') : null"
               >
                 <i
                  class="material-icons"
@@ -129,7 +129,6 @@ export default class VFTable extends Vue {
   }) private readonly tables!: Array<VTable>;
   @Prop({ type: String, default: '' }) private readonly search!: string;
   @Prop({ type: Boolean, default: false }) private readonly ordered!: boolean;
-  @Prop({ type: Boolean, default: false }) private readonly sortable!: boolean;
   @Prop({ type: Boolean, default: false }) private readonly countable!: boolean;
   @Prop({ type: String, default: 'No data to display' }) private readonly noDataText!: string;
   @Prop({ type: String, default: 'No matching records found' }) private readonly noResultsText!: string;
@@ -143,19 +142,19 @@ export default class VFTable extends Vue {
     // 1. Clone data
     this.tablesModel = copyDeep<VTable[]>(this.tables);
 
-    // 2. OPTIONAL: Add count column and number {count: number} for each row in table
+    // 2. OPTIONAL: Add column count and number {count: number} for each row in table
     if (this.countable) this.addCount();
 
     // 3. OPTIONAL: Sort columns by order
     if (this.ordered) this.sortColumnsByOrder();
 
-    // 4. OPTIONAL: Add default {sort_dir: 'asc'} for sorting
-    if (this.sortable) this.addSortDirToRow();
+    // 4. Add default {sort_dir: 'asc'} for sorting
+    this.addSortDirToRow();
   }
 
   addCount(): void {
     const order = this.ordered ? { order: 0 } : {};
-    this.tablesModel.forEach(table => table.headers.push({ text: '№', row_key: 'count', ...order }));
+    this.tablesModel.forEach(table => table.headers.push({ text: '№', row_key: 'count', sortable: true, ...order }));
     this.tablesModel.forEach(table => table.rows.forEach((row, index) => row.count = `${index + 1}`));
   }
 
@@ -170,7 +169,9 @@ export default class VFTable extends Vue {
   }
 
   addSortDirToRow(): void {
-    this.tablesModel.forEach(table => table.headers.forEach(header => header.sort_dir = 'asc'));
+    this.tablesModel.forEach(table => table.headers.forEach(header => {
+      header.sortable ? header.sort_dir = 'asc' : null;
+    }));
   }
 
   get isNoData(): boolean {
@@ -199,7 +200,7 @@ export default class VFTable extends Vue {
   }
 
   get sortedItems(): Row[] {
-    if (this.sortable && this.rowKeys.includes(this.currentColumnName[this.tab]) && this.currentColumnName[this.tab]) {
+    if (this.currentColumnDir && this.rowKeys.includes(this.currentColumnName[this.tab])) {
       return this.filteredItems.sort((a, b) => {
         const modifier = this.currentColumnDir === 'asc' ? 1 : -1;
 
@@ -219,18 +220,17 @@ export default class VFTable extends Vue {
       .find(header => header.row_key === this.currentColumnName[this.tab])!;
   }
 
-  sortBy(colName: string) {
-    if (this.sortable) {
+  sortBy(colName: string): void {
+    if (this.currentColumnName[this.tab] !== colName) {
       this.$set(this.currentColumnName, this.tab, colName);
       this.currentColumnDir = this.findColForSort()!.sort_dir || 'asc';
     }
   }
 
-  changeSortDirForCurCol(colName: string, dir: SortDir) {
-    if (this.sortable) {
-      this.currentColumnName[this.tab] = colName;
-      this.findColForSort()!.sort_dir = dir;
-    }
+  changeSortDirForCurCol(colName: string, dir: SortDir): void {
+    this.currentColumnDir = dir;
+    this.currentColumnName[this.tab] = colName;
+    this.findColForSort()!.sort_dir = dir;
   }
 
   findColType(key: string): ColType | undefined {

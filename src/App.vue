@@ -10,7 +10,6 @@
      :search="search"
      countable
      ordered
-     sortable
      no-results-text="No matching records found"
      no-data-text="No data to display"
     />
@@ -37,6 +36,7 @@ export default class App extends Vue {
           {
             text: 'Brand',
             row_key: 'brand',
+            sortable: true,
             order: 1,
           },
           {
@@ -47,16 +47,19 @@ export default class App extends Vue {
           {
             text: 'Type',
             row_key: 'type',
+            sortable: true,
             order: 3,
           },
           {
             text: 'Year',
             row_key: 'year',
+            sortable: true,
             order: 4,
           },
           {
             text: 'Price',
             row_key: 'price',
+            sortable: true,
             order: 5,
             col_type: 'number'
           },
@@ -75,7 +78,7 @@ export default class App extends Vue {
             color: 'red',
             type: 'hatchback',
             year: '2014',
-            price: '25000',
+            price: '50000',
             uid: '2',
           },
           {
@@ -83,7 +86,7 @@ export default class App extends Vue {
             color: 'black',
             type: 'sedan',
             year: '2014',
-            price: '50000',
+            price: '25000',
             uid: '3',
           },
           {
@@ -107,11 +110,13 @@ export default class App extends Vue {
           {
             text: 'Color',
             row_key: 'color',
+            sortable: true,
             order: 2,
           },
           {
             text: 'Type',
             row_key: 'type',
+            sortable: true,
             order: 3,
           },
           {

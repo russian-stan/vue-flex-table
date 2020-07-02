@@ -6,7 +6,8 @@ export interface Header {
   row_key: string;
   order?: number;
   sort_dir?: SortDir;
-  col_type?: ColType
+  sortable?: boolean;
+  col_type?: ColType;
 }
 
 export interface Row {
