@@ -51,7 +51,7 @@
                  class="table-input table-input--column-search"
                  placeholder="search in column..."
                  type="text"
-                 v-model="dropDownColumnSearchValues[tab][header.row_key]"
+                 v-model.trim="dropDownColumnSearchValues[tab][header.row_key]"
                 >
                 <div class="dropdown-btns">
                   <button class="dropdown-btn" @click="searchByCurColumn()">Search</button>
@@ -158,7 +158,7 @@
 
 <script lang="ts">
 import { Component, Prop, Vue } from 'vue-property-decorator';
-import { ColType, Header, Row, SortDir, SelectsData, VTable } from '@/types/tableTypes';
+import { ColType, Header, Row, SelectsData, SortDir, VTable } from '@/types/tableTypes';
 import { copyDeep } from '@/helpers/copyDeep';
 import draggable from 'vuedraggable';
 
@@ -237,7 +237,7 @@ export default class VFTable extends Vue {
     }));
   }
 
-  createDropdownsSearchModel() {
+  createDropdownsSearchModel(): void {
     this.tablesModel.forEach((table, index) => {
       if (table.headers.some(header => header.hasOwnProperty('filterable'))) {
         this.dropDownColumnSearchValues.push({})
@@ -266,13 +266,24 @@ export default class VFTable extends Vue {
     }, [])
   }
 
+  get isColumnFilterApplied(): boolean {
+    return Object.values(this.dropDownColumnSearchValues[this.tab]).some(Boolean);
+  }
+
+  get filteredColumns(): Row[] {
+    if (this.isColumnFilterApplied) {
+      
+    }
+    return this.tablesModel[this.tab].rows;
+  }
+
   get filteredItems(): Row[] {
     if (this.search) {
       return this.tablesModel[this.tab].rows.filter(item => {
         return Object.values(item).some(item => item.toString().toLowerCase().includes(this.search))
       })
     }
-    return this.tablesModel[this.tab].rows
+    return this.tablesModel[this.tab].rows;
   }
 
   get sortedItems(): Row[] {
