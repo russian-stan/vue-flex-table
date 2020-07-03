@@ -124,6 +124,8 @@ export default class App extends Vue {
             text: 'Brand',
             row_key: 'brand',
             order: 1,
+            filterable: true,
+            sortable: true,
           },
           {
             text: 'Color',

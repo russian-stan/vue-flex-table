@@ -35,23 +35,28 @@
           >
             {{header.text}}
 
-            <!--FILTER-DROPDOWN-->
+            <!--COLUMN-SEARCH-DROPDOWN-->
             <template v-if="header.filterable">
               <button
                class="filter-btn"
-               @click="toggleDropDown(header.row_key)">
+               @click="toggleColumnSearchDropDown(header.row_key)">
                 <i class="material-icons">search</i>
               </button>
               <div
-               v-show="filterDropdown
-             && currentFilterName[tab] === header.row_key"
-               class="filter-dropdown"
+               v-show="isColumnDropdownOpen
+               && currentFilterName[tab] === header.row_key"
+               class="column-search-dropdown"
               >
                 <input
-                 class="table-input table-input--filter"
+                 class="table-input table-input--column-search"
                  placeholder="search in column..."
                  type="text"
+                 v-model="dropDownColumnSearchValues[tab][header.row_key]"
                 >
+                <div class="dropdown-btns">
+                  <button class="dropdown-btn" @click="searchByCurColumn()">Search</button>
+                  <button class="dropdown-btn">Reset</button>
+                </div>
               </div>
             </template>
 
@@ -186,11 +191,12 @@ export default class VFTable extends Vue {
   @Prop({ type: String, default: 'No matching records found' }) private readonly noResultsText!: string;
 
   tab = 0;
+  tablesModel: Array<VTable> = [];
   currentFilterName: string[] = [];
   currentColumnName: string[] = [];
+  dropDownColumnSearchValues: { [key: string]: string }[] = [];
   currentColumnDir: SortDir = 'asc';
-  tablesModel: Array<VTable> = [];
-  filterDropdown = false;
+  isColumnDropdownOpen = false;
 
   created() {
     // 1. Clone data
@@ -204,6 +210,9 @@ export default class VFTable extends Vue {
 
     // 4. Add default {sort_dir: 'asc'} for sorting
     this.addSortDirToRow();
+
+    // 5. create search model for dropdowns
+    this.createDropdownsSearchModel();
   }
 
   addCount(): void {
@@ -226,6 +235,19 @@ export default class VFTable extends Vue {
     this.tablesModel.forEach(table => table.headers.forEach(header => {
       header.sortable ? header.sort_dir = 'asc' : null;
     }));
+  }
+
+  createDropdownsSearchModel() {
+    this.tablesModel.forEach((table, index) => {
+      if (table.headers.some(header => header.hasOwnProperty('filterable'))) {
+        this.dropDownColumnSearchValues.push({})
+      }
+      table.headers.forEach(header => {
+        if (header.filterable) {
+          this.$set(this.dropDownColumnSearchValues[index], `${[header.row_key]}`, '')
+        }
+      })
+    });
   }
 
   get isNoData(): boolean {
@@ -269,6 +291,10 @@ export default class VFTable extends Vue {
     return this.filteredItems;
   }
 
+  searchByCurColumn() {
+
+  }
+
   findColForSort(): Header {
     return this.tablesModel[this.tab].headers
       .find(header => header.row_key === this.currentColumnName[this.tab])!;
@@ -287,11 +313,11 @@ export default class VFTable extends Vue {
     this.findColForSort()!.sort_dir = dir;
   }
 
-  toggleDropDown(colName: string): void {
-    this.filterDropdown = !this.filterDropdown;
+  toggleColumnSearchDropDown(colName: string): void {
+    this.isColumnDropdownOpen = !this.isColumnDropdownOpen;
     if (this.currentFilterName[this.tab] !== colName) {
       this.$set(this.currentFilterName, this.tab, colName);
-      this.filterDropdown = true;
+      this.isColumnDropdownOpen = true;
     }
   }
 
@@ -428,22 +454,49 @@ export default class VFTable extends Vue {
           }
         }
 
-        .filter-dropdown {
+        .column-search-dropdown {
           position: absolute;
           top: 37px;
           left: 0;
           width: 200px;
-          height: 50px;
+          height: 80px;
+          padding: 5px 10px;
           background-color: #fafafa;
           display: flex;
-          align-items: center;
+          flex-wrap: wrap;
           justify-content: center;
           box-shadow: 0 3px 6px rgba(0, 0, 0, 0.16),
-                      0 3px 6px rgba(0, 0, 0, 0.23);
+          0 3px 6px rgba(0, 0, 0, 0.23);
           z-index: 10;
+        }
 
-          .filter-input {
+        .dropdown-btns {
+          /*outline: 1px dashed #000;*/
+          width: 100%;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
 
+          .dropdown-btn {
+            font-family: inherit;
+            color: #fafafa;
+            background-color: #0277BD;
+            font-size: 13px;
+            text-transform: uppercase;
+            border-radius: 0;
+            border: 0;
+            padding: 5px 15px;
+            cursor: pointer;
+            outline: none;
+            transition: all 0.1s ease-in-out;
+
+            &:hover {
+              background-color: rgba(#0277BD, 0.8);
+            }
+
+            &:active {
+              background-color: rgba(#0277BD, 0.5);
+            }
           }
         }
 
@@ -540,8 +593,10 @@ export default class VFTable extends Vue {
         cursor: pointer;
       }
 
-      &--filter {
+      &--column-search {
         text-align: left;
+        width: 100%;
+        max-width: 100%;
       }
     }
   }
