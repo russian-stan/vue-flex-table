@@ -187,11 +187,9 @@ export default class VFTable extends Vue {
 
   tab = 0;
   tablesModel: Array<VTable> = [];
-  // currentFilterName: string[] = [];
   currentColumnName: string[] = [];
   dropDownColumnSearchValues: { [key: string]: string }[] = [];
   currentColumnDir: SortDir = 'asc';
-  isColumnDropdownOpen = false;
 
   created() {
     // 1. Clone data
