@@ -71,7 +71,7 @@
         </draggable>
         </thead>
 
-        <tbody v-if="filteredItems.length">
+        <tbody>
         <tr v-if="columnSearch">
           <td
            v-for="(searchInput, index) in tablesModel[tab].headers"
@@ -88,58 +88,61 @@
             </div>
           </td>
         </tr>
-        <tr
-         v-for="row in sortedItems"
-         :key="row.uid"
-        >
-          <td
-           v-for="key in rowKeys"
-           :key="key"
+        <template v-if="filteredItems.length">
+          <tr
+           v-for="row in sortedItems"
+           :key="row.uid"
           >
-            <input
-             v-if="findColType(key) === 'number'"
-             class="table-input table-input--number"
-             type="number"
-             v-model="row[key]"
+            <td
+             v-for="key in rowKeys"
+             :key="key"
             >
+              <input
+               v-if="findColType(key) === 'number'"
+               class="table-input table-input--number"
+               type="number"
+               v-model="row[key]"
+              >
 
-            <input
-             v-else-if="findColType(key) === 'text'"
-             class="table-input table-input--text"
-             type="text"
-             v-model="row[key]"
-            >
+              <input
+               v-else-if="findColType(key) === 'text'"
+               class="table-input table-input--text"
+               type="text"
+               v-model="row[key]"
+              >
 
-            <select
-             v-else-if="findColType(key) === 'select' && selectsData[key]"
-             class="table-input table-input--select"
-             v-model="row[key]"
-            >
-              <option disabled value="">Choice an option</option>
-              <option v-for="option in selectsData[key]" :value="option.id">
-                {{option.text}}
-              </option>
-            </select>
+              <select
+               v-else-if="findColType(key) === 'select' && selectsData[key]"
+               class="table-input table-input--select"
+               v-model="row[key]"
+              >
+                <option disabled value="">Choice an option</option>
+                <option v-for="option in selectsData[key]" :value="option.id">
+                  {{option.text}}
+                </option>
+              </select>
 
-            <input
-             v-else-if="findColType(key) === 'date'"
-             class="table-input table-input--date"
-             type="date"
-             v-model="row[key]"
-            >
+              <input
+               v-else-if="findColType(key) === 'date'"
+               class="table-input table-input--date"
+               type="date"
+               v-model="row[key]"
+              >
 
-            <template v-else>
-              {{row[key]}}
-            </template>
-          </td>
-        </tr>
-        </tbody>
-        <tbody v-else>
-        <tr>
-          <td class="no-match" :colspan="tablesModel[tab].headers.length">
-            {{isNoData ? noDataText : noResultsText}}
-          </td>
-        </tr>
+              <template v-else>
+                {{row[key]}}
+              </template>
+            </td>
+          </tr>
+        </template>
+        <template v-else>
+          <tr>
+            <td class="no-match" :colspan="tablesModel[tab].headers.length">
+              {{isNoData ? noDataText : noResultsText}}
+            </td>
+          </tr>
+        </template>
+
         </tbody>
       </table>
     </div>
