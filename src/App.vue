@@ -2,13 +2,21 @@
   <div id="app">
     <label>
       Search
-      <input v-model.trim="search" type="text" style="margin-bottom: 20px; width: 200px">
+      <input v-model.trim="search" type="text" style="margin-bottom: 20px; width: 200px;">
     </label>
+    <div style="margin: 20px 0;">
+      <button
+       style="cursor: pointer;"
+       @click="columnSearch = !columnSearch">
+        Column search
+      </button>
+    </div>
 
     <VFTable
      :tables="data.tables"
      :selectsData="data.selects_data"
      :search="search"
+     :columnSearch="columnSearch"
      countable
      ordered
      no-results-text="No matching records found"
@@ -29,6 +37,7 @@ import VFTable from './components/VFTable.vue';
 })
 export default class App extends Vue {
   search = '';
+  columnSearch = false;
   data = {
     selects_data: {
       color: [

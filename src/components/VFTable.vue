@@ -35,31 +35,6 @@
           >
             {{header.text}}
 
-            <!--COLUMN-SEARCH-DROPDOWN-->
-            <template v-if="header.filterable">
-              <button
-               class="filter-btn"
-               @click="toggleColumnSearchDropDown(header.row_key)">
-                <i class="material-icons">search</i>
-              </button>
-              <div
-               v-show="isColumnDropdownOpen
-               && currentFilterName[tab] === header.row_key"
-               class="column-search-dropdown"
-              >
-                <input
-                 class="table-input table-input--column-search"
-                 placeholder="search in column..."
-                 type="text"
-                 v-model.trim="dropDownColumnSearchValues[tab][header.row_key]"
-                >
-                <div class="dropdown-btns">
-                  <button class="dropdown-btn" @click="searchByCurColumn()">Search</button>
-                  <button class="dropdown-btn">Reset</button>
-                </div>
-              </div>
-            </template>
-
             <div
              v-if="header.sortable
              && currentColumnName[tab] === header.row_key
@@ -97,6 +72,22 @@
         </thead>
 
         <tbody v-if="filteredItems.length">
+        <tr v-if="columnSearch">
+          <td
+           v-for="(searchInput, index) in tablesModel[tab].headers"
+           :key="index"
+          >
+            <div v-if="searchInput.filterable" class="search-column-input">
+              <i class="material-icons search-column-icon">search</i>
+              <input
+               class="table-input table-input--column-search"
+               placeholder="search in column..."
+               type="text"
+               v-model.trim="dropDownColumnSearchValues[tab][searchInput.row_key]"
+              >
+            </div>
+          </td>
+        </tr>
         <tr
          v-for="row in sortedItems"
          :key="row.uid"
@@ -187,12 +178,13 @@ export default class VFTable extends Vue {
   @Prop({ type: String, default: '' }) private readonly search!: string;
   @Prop({ type: Boolean, default: false }) private readonly ordered!: boolean;
   @Prop({ type: Boolean, default: false }) private readonly countable!: boolean;
+  @Prop({ type: Boolean, default: false }) private readonly columnSearch!: boolean;
   @Prop({ type: String, default: 'No data to display' }) private readonly noDataText!: string;
   @Prop({ type: String, default: 'No matching records found' }) private readonly noResultsText!: string;
 
   tab = 0;
   tablesModel: Array<VTable> = [];
-  currentFilterName: string[] = [];
+  // currentFilterName: string[] = [];
   currentColumnName: string[] = [];
   dropDownColumnSearchValues: { [key: string]: string }[] = [];
   currentColumnDir: SortDir = 'asc';
@@ -272,18 +264,28 @@ export default class VFTable extends Vue {
 
   get filteredColumns(): Row[] {
     if (this.isColumnFilterApplied) {
-      
+      let filtered: Row[] = [];
+      let temp: Row[] = copyDeep<Row[]>(this.tablesModel[this.tab].rows);
+
+      for (let prop in this.dropDownColumnSearchValues[this.tab]) {
+        if (!this.dropDownColumnSearchValues[this.tab][prop]) continue;
+        filtered = temp.filter(row => {
+          return row[prop].toString().toLowerCase().includes(this.dropDownColumnSearchValues[this.tab][prop].toLowerCase())
+        })
+        temp = filtered;
+      }
+      return filtered;
     }
     return this.tablesModel[this.tab].rows;
   }
 
   get filteredItems(): Row[] {
     if (this.search) {
-      return this.tablesModel[this.tab].rows.filter(item => {
-        return Object.values(item).some(item => item.toString().toLowerCase().includes(this.search))
+      return this.filteredColumns.filter(item => {
+        return Object.values(item).some(item => item.toString().toLowerCase().includes(this.search.toLowerCase()))
       })
     }
-    return this.tablesModel[this.tab].rows;
+    return this.filteredColumns;
   }
 
   get sortedItems(): Row[] {
@@ -302,10 +304,6 @@ export default class VFTable extends Vue {
     return this.filteredItems;
   }
 
-  searchByCurColumn() {
-
-  }
-
   findColForSort(): Header {
     return this.tablesModel[this.tab].headers
       .find(header => header.row_key === this.currentColumnName[this.tab])!;
@@ -322,14 +320,6 @@ export default class VFTable extends Vue {
     this.currentColumnDir = dir;
     this.currentColumnName[this.tab] = colName;
     this.findColForSort()!.sort_dir = dir;
-  }
-
-  toggleColumnSearchDropDown(colName: string): void {
-    this.isColumnDropdownOpen = !this.isColumnDropdownOpen;
-    if (this.currentFilterName[this.tab] !== colName) {
-      this.$set(this.currentFilterName, this.tab, colName);
-      this.isColumnDropdownOpen = true;
-    }
   }
 
   findColType(key: string): ColType | undefined {
@@ -435,82 +425,6 @@ export default class VFTable extends Vue {
           cursor: pointer;
         }
 
-        .filter-btn {
-          position: absolute;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          top: 0;
-          left: 0;
-          height: 36px;
-          background-color: transparent;
-          border: 0;
-          cursor: pointer;
-          transition: all 0.25s ease-in-out;
-          outline: none;
-          z-index: 1;
-
-          &:hover {
-            background-color: rgba(#000000, 0.1);
-          }
-
-          &:focus {
-            background-color: rgba(#000000, 0.1);
-          }
-
-          i {
-            font-size: 14px;
-            line-height: 14px;
-            color: #fafafa;
-          }
-        }
-
-        .column-search-dropdown {
-          position: absolute;
-          top: 37px;
-          left: 0;
-          width: 200px;
-          height: 80px;
-          padding: 5px 10px;
-          background-color: #fafafa;
-          display: flex;
-          flex-wrap: wrap;
-          justify-content: center;
-          box-shadow: 0 3px 6px rgba(0, 0, 0, 0.16),
-          0 3px 6px rgba(0, 0, 0, 0.23);
-          z-index: 10;
-        }
-
-        .dropdown-btns {
-          /*outline: 1px dashed #000;*/
-          width: 100%;
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-
-          .dropdown-btn {
-            font-family: inherit;
-            color: #fafafa;
-            background-color: #0277BD;
-            font-size: 13px;
-            text-transform: uppercase;
-            border-radius: 0;
-            border: 0;
-            padding: 5px 15px;
-            cursor: pointer;
-            outline: none;
-            transition: all 0.1s ease-in-out;
-
-            &:hover {
-              background-color: rgba(#0277BD, 0.8);
-            }
-
-            &:active {
-              background-color: rgba(#0277BD, 0.5);
-            }
-          }
-        }
-
         .sort-buttons {
           position: absolute;
           top: 50%;
@@ -555,6 +469,25 @@ export default class VFTable extends Vue {
         }
       }
 
+      .search-column-input {
+        position: relative;
+        display: flex;
+        width: 100%;
+        align-items: center;
+        justify-content: space-between;
+
+        .search-column-icon {
+          position: absolute;
+          top: 4px;
+          left: 5px;
+          width: 21px;
+          height: 21px;
+          line-height: 21px;
+          font-size: 21px;
+          color: #0277BD;
+        }
+      }
+
       td {
         padding: 5px;
         line-height: 28px;
@@ -584,7 +517,7 @@ export default class VFTable extends Vue {
       padding: 5px;
       text-align: center;
       border: 1px solid rgba(#0277BD, 0.5);
-      max-width: 170px;
+      min-width: 95%;
       height: 28px;
 
       &:focus {
@@ -606,8 +539,14 @@ export default class VFTable extends Vue {
 
       &--column-search {
         text-align: left;
-        width: 100%;
-        max-width: 100%;
+        min-width: 100%;
+        padding-left: 25px;
+        border-radius: 20px;
+
+        &:focus {
+          outline: none;
+          border: 2px solid #0277BD;
+        }
       }
     }
   }
