@@ -19,6 +19,7 @@
      :columnSearch="columnSearch"
      countable
      ordered
+     draggable
      no-results-text="No matching records found"
      no-data-text="No data to display"
     />

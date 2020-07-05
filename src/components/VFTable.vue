@@ -33,13 +33,15 @@
              'active': header.sortable && header.row_key === currentColumnName[tab],
              'pointer': header.sortable
            }"
-           ref="header"
-           draggable
+           ref="headers"
+           :draggable="draggable"
            @click.self="header.sortable ? sortBy(header.row_key) : null"
-           @dragstart='startDrag($event, header.order)'
-           @drop.stop='onDrop($event, header.order)'
-           @dragover.prevent
-           @dragenter.prevent
+           @dragstart="draggable ? onDragStart($event, header.order) : null"
+           @dragenter.prevent="draggable ? onDragEnter($event) : null"
+           @dragover.prevent="draggable ? onDragOver($event) : null"
+           @dragleave.prevent="draggable ? onDragLeave($event) : null"
+           @drop.stop="draggable ? onDrop($event, header.order) : null"
+           @dragend="draggable ? onDragEnd($event) : null"
           >
             {{header.text}}
 
@@ -159,16 +161,11 @@
 </template>
 
 <script lang="ts">
-import { Component, Prop, Vue } from 'vue-property-decorator';
+import { Component, Prop, Ref, Vue } from 'vue-property-decorator';
 import { ColType, Header, Row, SelectsData, SortDir, VTable } from '@/types/tableTypes';
 import { copyDeep } from '@/helpers/copyDeep';
-import draggable from 'vuedraggable';
 
-@Component({
-  components: {
-    draggable,
-  },
-})
+@Component
 export default class VFTable extends Vue {
   @Prop({
     type: Array, default() {
@@ -189,9 +186,11 @@ export default class VFTable extends Vue {
   @Prop({ type: String, default: '' }) private readonly search!: string;
   @Prop({ type: Boolean, default: false }) private readonly ordered!: boolean;
   @Prop({ type: Boolean, default: false }) private readonly countable!: boolean;
+  @Prop({ type: Boolean, default: false }) private readonly draggable!: boolean;
   @Prop({ type: Boolean, default: false }) private readonly columnSearch!: boolean;
   @Prop({ type: String, default: 'No data to display' }) private readonly noDataText!: string;
   @Prop({ type: String, default: 'No matching records found' }) private readonly noResultsText!: string;
+  @Ref('headers') readonly headers!: HTMLTableHeaderCellElement[];
 
   tab = 0;
   tablesModel: Array<VTable> = [];
@@ -216,47 +215,45 @@ export default class VFTable extends Vue {
     this.createDropdownsSearchModel();
   }
 
-  startDrag(evt: DragEvent, targetIndex: number) {
-    if (evt.dataTransfer) {
-      evt.dataTransfer.dropEffect = 'move';
-      evt.dataTransfer.effectAllowed = 'move';
-      evt.dataTransfer.setData('targetIndex', targetIndex.toString());
-    }
+  onDragStart(evt: DragEvent, targetIndex: number) {
+    (evt.target! as HTMLTableHeaderCellElement).style.opacity = '0.7';
+    evt.dataTransfer!.effectAllowed = 'move';
+    evt.dataTransfer!.setData('targetIndex', targetIndex.toString());
+  }
+
+  onDragEnter(evt: DragEvent) {
+    (evt.target! as HTMLTableHeaderCellElement).classList.add('drag-dest')
+  }
+
+  onDragOver(evt: DragEvent) {
+    evt.dataTransfer!.dropEffect = 'move';
+  }
+
+  onDragLeave(evt: DragEvent) {
+    (evt.target! as HTMLTableHeaderCellElement).classList.remove('drag-dest');
   }
 
   onDrop(evt: DragEvent, destinationIndex: number) {
-    if (evt.dataTransfer) {
-      const targetIndex = evt.dataTransfer.getData('targetIndex');
-      this.swapColumns(+targetIndex, destinationIndex)
-    }
+    const targetIndex = evt.dataTransfer!.getData('targetIndex');
+    this.swapColumns(+targetIndex, destinationIndex)
+  }
+
+  onDragEnd(evt: DragEvent) {
+    (evt.target! as HTMLTableHeaderCellElement).style.opacity = '';
+    this.headers.forEach(header => {
+      header.classList.remove('drag-dest')
+    });
   }
 
   swapColumns(targetIndex: number, destinationIndex: number) {
     const target = this.tablesModel[this.tab].headers.find(col => col.order === targetIndex);
     const destination = this.tablesModel[this.tab].headers.find(col => col.order === destinationIndex);
-    if (target && destination) {
-      // console.log({ target, destination });
+    if (target && destination && targetIndex !== destinationIndex) {
       target.order = destinationIndex;
       destination.order = targetIndex;
       if (this.ordered) this.sortColumnsByOrder();
     }
   }
-
-  // showDragHint(index: number) {
-  //   const header: HTMLTableHeaderCellElement = this.$refs.header[index];
-  //   header.classList.add('bordered');
-  // }
-  //
-  // hideDragHint(index: number) {
-  //   const header: HTMLTableHeaderCellElement = this.$refs.header[index];
-  //   header.classList.remove('bordered');
-  // }
-  //
-  // removeAllHints() {
-  //   console.log('removeAllHints');
-  //   const headers: HTMLCollection = this.$refs.header;
-  //   Array.from(headers).forEach(header => header.classList.remove('bordered'));
-  // }
 
   addCount(): void {
     const order = this.ordered ? { order: 0 } : {};
@@ -486,8 +483,8 @@ export default class VFTable extends Vue {
           cursor: pointer;
         }
 
-        &.bordered {
-          border: 2px dashed #000000;
+        &.drag-dest {
+          background-color: #00629a;
         }
 
         .sort-buttons {
