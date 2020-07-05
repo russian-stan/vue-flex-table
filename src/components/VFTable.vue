@@ -30,6 +30,7 @@
           <th
            v-for="header in tablesModel[tab].headers"
            :key="header.row_key"
+           :style="{'width': calculateColumnWidth(header.row_key)}"
            :class="{'active': header.sortable && header.row_key === currentColumnName[tab], 'pointer': header.sortable}"
            @click.self="header.sortable ? sortBy(header.row_key) : null"
           >
@@ -212,6 +213,16 @@ export default class VFTable extends Vue {
     const order = this.ordered ? { order: 0 } : {};
     this.tablesModel.forEach(table => table.headers.push({ text: '№', row_key: 'count', sortable: true, ...order }));
     this.tablesModel.forEach(table => table.rows.forEach((row, index) => row.count = `${index + 1}`));
+  }
+
+  calculateColumnWidth(rowKey: string): string {
+    const countColumnWidth = 7;
+    const columnsCount = this.tablesModel[this.tab].headers.length;
+    if (this.ordered) {
+      if (rowKey === 'count') return countColumnWidth + '%';
+      return ((100 - countColumnWidth) / (columnsCount - 1)) + '%';
+    }
+    return (100 / columnsCount) + '%';
   }
 
   sortColumnsByOrder(): void {
@@ -472,10 +483,7 @@ export default class VFTable extends Vue {
 
       .search-column-input {
         position: relative;
-        display: flex;
         width: 100%;
-        align-items: center;
-        justify-content: space-between;
 
         .search-column-icon {
           position: absolute;
@@ -503,7 +511,6 @@ export default class VFTable extends Vue {
       }
 
       th, td {
-        min-width: 90px;
         text-align: center;
         font-size: 14px;
       }
