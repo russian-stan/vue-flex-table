@@ -93,7 +93,7 @@
                class="table-input table-input--column-search"
                placeholder="search in column..."
                type="text"
-               v-model.trim="dropDownColumnSearchValues[tab][searchInput.row_key]"
+               v-model.trim="columnSearchValues[tab][searchInput.row_key]"
               >
             </div>
           </td>
@@ -121,6 +121,22 @@
                v-model="row[key]"
               >
 
+
+              <input
+               v-else-if="findColType(key) === 'date'"
+               class="table-input table-input--date"
+               type="date"
+               v-model="row[key]"
+              >
+
+
+              <input
+               v-else-if="findColType(key) === 'checkbox'"
+               class="table-checkbox"
+               type="checkbox"
+               v-model="row[key]"
+              >
+
               <select
                v-else-if="findColType(key) === 'select' && selectsData[key]"
                class="table-input table-input--select"
@@ -131,13 +147,6 @@
                   {{option.text}}
                 </option>
               </select>
-
-              <input
-               v-else-if="findColType(key) === 'date'"
-               class="table-input table-input--date"
-               type="date"
-               v-model="row[key]"
-              >
 
               <template v-else>
                 {{row[key]}}
@@ -195,7 +204,7 @@ export default class VFTable extends Vue {
   tab = 0;
   tablesModel: Array<VTable> = [];
   currentColumnName: string[] = [];
-  dropDownColumnSearchValues: { [key: string]: string }[] = [];
+  columnSearchValues: { [key: string]: string }[] = [];
   currentColumnDir: SortDir = 'asc';
 
   created() {
@@ -212,7 +221,7 @@ export default class VFTable extends Vue {
     this.addSortDirToRow();
 
     // 5. create search model for dropdowns
-    this.createDropdownsSearchModel();
+    this.createColumnsSearchModel();
   }
 
   onDragStart(evt: DragEvent, targetIndex: number) {
@@ -287,14 +296,14 @@ export default class VFTable extends Vue {
     }));
   }
 
-  createDropdownsSearchModel(): void {
+  createColumnsSearchModel(): void {
     this.tablesModel.forEach((table, index) => {
       if (table.headers.some(header => header.hasOwnProperty('filterable'))) {
-        this.dropDownColumnSearchValues.push({})
+        this.columnSearchValues.push({})
       }
       table.headers.forEach(header => {
         if (header.filterable) {
-          this.$set(this.dropDownColumnSearchValues[index], `${[header.row_key]}`, '')
+          this.$set(this.columnSearchValues[index], `${[header.row_key]}`, '')
         }
       })
     });
@@ -317,7 +326,7 @@ export default class VFTable extends Vue {
   }
 
   get isColumnFilterApplied(): boolean {
-    return Object.values(this.dropDownColumnSearchValues[this.tab]).some(Boolean);
+    return Object.values(this.columnSearchValues[this.tab]).some(Boolean);
   }
 
   get filteredColumns(): Row[] {
@@ -325,10 +334,10 @@ export default class VFTable extends Vue {
       let filtered: Row[] = [];
       let temp: Row[] = copyDeep<Row[]>(this.tablesModel[this.tab].rows);
 
-      for (let prop in this.dropDownColumnSearchValues[this.tab]) {
-        if (!this.dropDownColumnSearchValues[this.tab][prop]) continue;
+      for (let prop in this.columnSearchValues[this.tab]) {
+        if (!this.columnSearchValues[this.tab][prop]) continue;
         filtered = temp.filter(row => {
-          return row[prop].toString().toLowerCase().includes(this.dropDownColumnSearchValues[this.tab][prop].toLowerCase())
+          return row[prop].toString().toLowerCase().includes(this.columnSearchValues[this.tab][prop].toLowerCase())
         })
         temp = filtered;
       }
@@ -606,6 +615,10 @@ export default class VFTable extends Vue {
           border: 2px solid #0277BD;
         }
       }
+    }
+
+    .table-checkbox {
+      cursor: pointer;
     }
   }
 

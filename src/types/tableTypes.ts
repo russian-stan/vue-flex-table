@@ -1,5 +1,5 @@
 export type SortDir = 'asc' | 'desc';
-export type ColType = 'text' | 'number' | 'date' | 'select';
+export type ColType = 'text' | 'number' | 'date' | 'select' | 'checkbox';
 
 export interface Header {
   text: string;
@@ -12,7 +12,7 @@ export interface Header {
 }
 
 export interface Row {
-  [key: string]: string | number;
+  [key: string]: string | number | boolean;
 }
 
 export interface VTable {

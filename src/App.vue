@@ -91,6 +91,14 @@ export default class App extends Vue {
             col_type: 'number',
             order: 5,
           },
+          {
+            text: 'Is for sale',
+            row_key: 'for_sale',
+            sortable: true,
+            filterable: true,
+            col_type: 'checkbox',
+            order: 6,
+          },
         ],
         rows: [
           {
@@ -99,6 +107,7 @@ export default class App extends Vue {
             type: 'sedan',
             issue_date: '2015-01-02',
             price: '20000',
+            for_sale: true,
             uid: '1',
           },
           {
@@ -107,6 +116,7 @@ export default class App extends Vue {
             type: 'hatchback',
             issue_date: '2018-01-02',
             price: '50000',
+            for_sale: true,
             uid: '2',
           },
           {
@@ -115,6 +125,7 @@ export default class App extends Vue {
             type: 'sedan',
             issue_date: '2013-01-02',
             price: '25000',
+            for_sale: false,
             uid: '3',
           },
           {
@@ -123,7 +134,8 @@ export default class App extends Vue {
             type: 'sedan',
             issue_date: '2017-01-02',
             price: '55000',
-            uid: '4',
+            for_sale: false,
+            uid: '5',
           },
         ],
       },
