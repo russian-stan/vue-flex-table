@@ -27,3 +27,14 @@ export interface SelectsData {
     id: string;
   }[];
 }
+
+export interface FooterProps {
+  itemsPerPageOptions: number[];
+  itemsPerPageText: string;
+  showFirstLastPage: boolean;
+}
+
+export interface FooterModel {
+  itemsPerPage: number;
+  curPage: number;
+}

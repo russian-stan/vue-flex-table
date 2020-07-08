@@ -16,12 +16,17 @@
      :tables="data.tables"
      :selectsData="data.selects_data"
      :search="search"
-     :columnSearch="columnSearch"
+     :column-search="columnSearch"
      countable
      ordered
      draggable
      no-results-text="No matching records found"
      no-data-text="No data to display"
+     :footer-props="{
+        itemsPerPageOptions: [5, 10, 20],
+        itemsPerPageText:'Rows per page',
+        showFirstLastPage: true
+     }"
     />
   </div>
 </template>
@@ -49,7 +54,7 @@ export default class App extends Vue {
       return new Date(start.getTime() + Math.random() * (end.getTime() - start.getTime())).toISOString().slice(0, 10);
     }
 
-    for (let i = 0; i < 10; i++) {
+    for (let i = 0; i < 50; i++) {
       rows.push(
         {
           brand: brands[Math.round(Math.abs(Math.random() * brands.length - 1))],

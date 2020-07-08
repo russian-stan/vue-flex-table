@@ -100,62 +100,62 @@
             </div>
           </td>
         </tr>
-          <template v-if="filteredItems.length">
-            <tr
-             v-for="row in sortedItems"
-             :key="row.uid"
+        <template v-if="filteredItems.length">
+          <tr
+           v-for="row in sortedItems"
+           :key="row.uid"
+          >
+            <td
+             v-for="key in rowKeys"
+             :key="key"
             >
-              <td
-               v-for="key in rowKeys"
-               :key="key"
+              <input
+               v-if="findColType(key) === 'number'"
+               class="table-input table-input--number"
+               type="number"
+               v-model="row[key]"
               >
-                <input
-                 v-if="findColType(key) === 'number'"
-                 class="table-input table-input--number"
-                 type="number"
-                 v-model="row[key]"
-                >
 
-                <input
-                 v-else-if="findColType(key) === 'text'"
-                 class="table-input table-input--text"
-                 type="text"
-                 v-model="row[key]"
-                >
+              <input
+               v-else-if="findColType(key) === 'text'"
+               class="table-input table-input--text"
+               type="text"
+               v-model="row[key]"
+              >
 
 
-                <input
-                 v-else-if="findColType(key) === 'date'"
-                 class="table-input table-input--date"
-                 type="date"
-                 v-model="row[key]"
-                >
+              <input
+               v-else-if="findColType(key) === 'date'"
+               class="table-input table-input--date"
+               type="date"
+               v-model="row[key]"
+              >
 
 
-                <input
-                 v-else-if="findColType(key) === 'checkbox'"
-                 class="table-checkbox"
-                 type="checkbox"
-                 v-model="row[key]"
-                >
+              <input
+               v-else-if="findColType(key) === 'checkbox'"
+               class="table-checkbox"
+               type="checkbox"
+               v-model="row[key]"
+              >
 
-                <select
-                 v-else-if="findColType(key) === 'select' && selectsData[key]"
-                 class="table-input table-input--select"
-                 v-model="row[key]"
-                >
-                  <option disabled value="">Choice an option</option>
-                  <option v-for="option in selectsData[key]" :value="option.id">
-                    {{option.text}}
-                  </option>
-                </select>
+              <select
+               v-else-if="findColType(key) === 'select' && selectsData[key]"
+               class="table-input table-input--select"
+               v-model="row[key]"
+              >
+                <option disabled value="">Choice an option</option>
+                <option v-for="option in selectsData[key]" :value="option.id">
+                  {{option.text}}
+                </option>
+              </select>
 
-                <template v-else>
-                  {{row[key]}}
-                </template>
-              </td>
-            </tr>
-          </template>
+              <template v-else>
+                {{row[key]}}
+              </template>
+            </td>
+          </tr>
+        </template>
         <template v-if="!filteredItems.length">
           <tr>
             <td class="no-match" :colspan="tablesModel[tab].headers.length">
@@ -167,16 +167,17 @@
         </tbody>
       </table>
 
-      <div class="table-footer">
+      <div v-if="!hideDefaultFooter" class="table-footer">
         <div class="rows-count">
 
           <div class="items-select">
             <label class="items-count-label" for="items-count">Rows per page:</label>
-            <select id="items-count" class="table-input table-input--items-count">
-              <option>5</option>
-              <option>10</option>
-              <option>20</option>
-              <option>All</option>
+            <select
+             v-model.number="footerModel[tab].itemsPerPage"
+             id="items-count"
+             class="table-input table-input--items-count"
+            >
+              <option v-for="count in footerProps.itemsPerPageOptions" :key="count">{{count}}</option>
             </select>
           </div>
 
@@ -200,7 +201,7 @@
 
 <script lang="ts">
 import { Component, Prop, Ref, Vue } from 'vue-property-decorator';
-import { ColType, Header, Row, SelectsData, SortDir, VTable } from '@/types/tableTypes';
+import { ColType, Header, Row, SelectsData, SortDir, FooterProps, FooterModel, VTable } from '@/types/tableTypes';
 import { copyDeep } from '@/helpers/copyDeep';
 
 @Component
@@ -221,16 +222,28 @@ export default class VFTable extends Vue {
       return {}
     },
   }) private readonly selectsData!: SelectsData;
+  @Prop({
+    type: Object, default() {
+      return {
+        itemsPerPageOptions: [10],
+        itemsPerPageText: 'Rows per page',
+        showFirstLastPage: true,
+      }
+    },
+  }) private readonly footerProps!: FooterProps;
   @Prop({ type: String, default: '' }) private readonly search!: string;
   @Prop({ type: Boolean, default: false }) private readonly ordered!: boolean;
   @Prop({ type: Boolean, default: false }) private readonly countable!: boolean;
   @Prop({ type: Boolean, default: false }) private readonly draggable!: boolean;
   @Prop({ type: Boolean, default: false }) private readonly columnSearch!: boolean;
+  @Prop({ type: Boolean, default: false }) private readonly hideDefaultFooter!: boolean;
   @Prop({ type: String, default: 'No data to display' }) private readonly noDataText!: string;
   @Prop({ type: String, default: 'No matching records found' }) private readonly noResultsText!: string;
   @Ref('headers') readonly headers!: HTMLTableHeaderCellElement[];
 
   tab = 0;
+  itemsPerPage: number = this.footerProps.itemsPerPageOptions[0];
+  footerModel: Array<FooterModel> = [];
   tablesModel: Array<VTable> = [];
   currentColumnName: string[] = [];
   columnSearchValues: { [key: string]: string }[] = [];
@@ -251,6 +264,9 @@ export default class VFTable extends Vue {
 
     // 5. create search model for dropdowns
     this.createColumnsSearchModel();
+
+    // 6. OPTIONAL Set footer model
+    if (!this.hideDefaultFooter) this.createFooterModel();
   }
 
   onDragStart(evt: DragEvent, targetIndex: number) {
@@ -334,6 +350,15 @@ export default class VFTable extends Vue {
         if (header.filterable) {
           this.$set(this.columnSearchValues[index], `${[header.row_key]}`, '')
         }
+      })
+    });
+  }
+
+  createFooterModel() {
+    this.tablesModel.forEach(() => {
+      this.footerModel.push({
+        itemsPerPage: this.footerProps.itemsPerPageOptions[0],
+        curPage: 1,
       })
     });
   }
