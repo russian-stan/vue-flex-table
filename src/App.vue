@@ -23,7 +23,6 @@
      no-results-text="No matching records found"
      no-data-text="No data to display"
     />
-
   </div>
 </template>
 
@@ -38,7 +37,35 @@ import VFTable from './components/VFTable.vue';
 })
 export default class App extends Vue {
   search = '';
-  columnSearch = false;
+  columnSearch = true;
+
+  generateRows() {
+
+    const rows = [];
+    const brands = ['Ford', 'Mazda', 'Mercedes', 'Audi', 'Volkswagen', 'Renault', 'Mitsubishi', 'Volvo'];
+    const type = ['sedan', 'hatchback', 'coupe'];
+
+    const randomDate = (start: Date, end: Date): string => {
+      return new Date(start.getTime() + Math.random() * (end.getTime() - start.getTime())).toISOString().slice(0, 10);
+    }
+
+    for (let i = 0; i < 100; i++) {
+      rows.push(
+        {
+          brand: brands[Math.round(Math.abs(Math.random() * brands.length - 1))],
+          color: Math.round(Math.random() * 4 + 1).toString(),
+          type: type[Math.round(Math.abs(Math.random() * type.length - 1))],
+          issue_date: randomDate(new Date(2012, 0, 1), new Date()),
+          price: Math.round(Math.random() * 35000).toString(),
+          for_sale: !!Math.round(Math.random()),
+          uid: i,
+        },
+      )
+    }
+
+    return rows;
+  }
+
   data = {
     selects_data: {
       color: [
@@ -100,44 +127,45 @@ export default class App extends Vue {
             order: 6,
           },
         ],
-        rows: [
-          {
-            brand: 'Ford',
-            color: '1',
-            type: 'sedan',
-            issue_date: '2015-01-02',
-            price: '20000',
-            for_sale: true,
-            uid: '1',
-          },
-          {
-            brand: 'Mazda',
-            color: '2',
-            type: 'hatchback',
-            issue_date: '2018-01-02',
-            price: '50000',
-            for_sale: true,
-            uid: '2',
-          },
-          {
-            brand: 'BMW',
-            color: '3',
-            type: 'sedan',
-            issue_date: '2013-01-02',
-            price: '25000',
-            for_sale: false,
-            uid: '3',
-          },
-          {
-            brand: 'Audi',
-            color: '4',
-            type: 'sedan',
-            issue_date: '2017-01-02',
-            price: '55000',
-            for_sale: false,
-            uid: '5',
-          },
-        ],
+        // rows: [
+        //   {
+        //     brand: 'Ford',
+        //     color: '1',
+        //     type: 'sedan',
+        //     issue_date: '2015-01-02',
+        //     price: '20000',
+        //     for_sale: true,
+        //     uid: '1',
+        //   },
+        //   {
+        //     brand: 'Mazda',
+        //     color: '2',
+        //     type: 'hatchback',
+        //     issue_date: '2018-01-02',
+        //     price: '50000',
+        //     for_sale: true,
+        //     uid: '2',
+        //   },
+        //   {
+        //     brand: 'BMW',
+        //     color: '3',
+        //     type: 'sedan',
+        //     issue_date: '2013-01-02',
+        //     price: '25000',
+        //     for_sale: false,
+        //     uid: '3',
+        //   },
+        //   {
+        //     brand: 'Audi',
+        //     color: '4',
+        //     type: 'sedan',
+        //     issue_date: '2017-01-02',
+        //     price: '55000',
+        //     for_sale: false,
+        //     uid: '5',
+        //   },
+        // ],
+        rows: this.generateRows(),
       },
       {
         label: 'Brand new cars',
