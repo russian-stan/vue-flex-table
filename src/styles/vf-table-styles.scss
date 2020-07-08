@@ -63,7 +63,7 @@
     border-collapse: collapse;
     width: 100%;
 
-    thead {
+    .table-header {
       color: #fafafa;
     }
 
@@ -307,6 +307,11 @@
 
         &:active {
           background-color: #e7dddd;;
+        }
+
+        &.disabled {
+          pointer-events: none;
+          opacity: 0.5;
         }
       }
     }

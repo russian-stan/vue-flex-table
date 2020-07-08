@@ -54,7 +54,7 @@ export default class App extends Vue {
       return new Date(start.getTime() + Math.random() * (end.getTime() - start.getTime())).toISOString().slice(0, 10);
     }
 
-    for (let i = 0; i < 50; i++) {
+    for (let i = 0; i < 53; i++) {
       rows.push(
         {
           brand: brands[Math.round(Math.abs(Math.random() * brands.length - 1))],

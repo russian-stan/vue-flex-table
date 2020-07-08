@@ -23,7 +23,7 @@
         </colgroup>
 
         <!--======================= HEADERS =======================-->
-        <thead v-if="!isNoHeaders">
+        <thead class="table-header" v-if="!isNoHeaders">
         <tr
         >
           <th
@@ -102,7 +102,7 @@
         </tr>
         <template v-if="filteredItems.length">
           <tr
-           v-for="row in sortedItems"
+           v-for="row in slicedItems"
            :key="row.uid"
           >
             <td
@@ -182,14 +182,27 @@
           </div>
 
           <span class="items-per-page">
-            1-5 of {{tablesModel[tab].rows.length}}
+            {{footerModel[tab].curPage + 1}}
+            -
+            {{!isPageUpDisabled ? footerModel[tab].curPage + footerModel[tab].itemsPerPage : tablesModel[tab].rows.length}}
+            of {{tablesModel[tab].rows.length}}
           </span>
         </div>
         <div class="items-buttons">
-          <button class="item-button">
+          <button
+           @click="pageDown"
+           :disabled="isPageDownDisabled"
+           :class="{'disabled': isPageDownDisabled}"
+           class="item-button"
+          >
             <i class="material-icons">chevron_left</i>
           </button>
-          <button class="item-button">
+          <button
+           @click="pageUp"
+           :disabled="isPageUpDisabled"
+           :class="{'disabled': isPageUpDisabled}"
+           class="item-button"
+          >
             <i class="material-icons">chevron_right</i>
           </button>
         </div>
@@ -201,8 +214,8 @@
 
 <script lang="ts">
 import { Component, Prop, Ref, Vue } from 'vue-property-decorator';
-import { ColType, Header, Row, SelectsData, SortDir, FooterProps, FooterModel, VTable } from '@/types/tableTypes';
 import { copyDeep } from '@/helpers/copyDeep';
+import { ColType, Header, Row, SelectsData, SortDir, FooterProps, FooterModel, VTable } from '@/types/tableTypes';
 
 @Component
 export default class VFTable extends Vue {
@@ -242,7 +255,6 @@ export default class VFTable extends Vue {
   @Ref('headers') readonly headers!: HTMLTableHeaderCellElement[];
 
   tab = 0;
-  itemsPerPage: number = this.footerProps.itemsPerPageOptions[0];
   footerModel: Array<FooterModel> = [];
   tablesModel: Array<VTable> = [];
   currentColumnName: string[] = [];
@@ -358,7 +370,7 @@ export default class VFTable extends Vue {
     this.tablesModel.forEach(() => {
       this.footerModel.push({
         itemsPerPage: this.footerProps.itemsPerPageOptions[0],
-        curPage: 1,
+        curPage: 0,
       })
     });
   }
@@ -423,6 +435,36 @@ export default class VFTable extends Vue {
       });
     }
     return this.filteredItems;
+  }
+
+  get slicedItems(): Row[] {
+    return this.sortedItems.slice(
+      this.footerModel[this.tab].curPage,
+      this.footerModel[this.tab].curPage + this.footerModel[this.tab].itemsPerPage,
+    );
+  }
+
+  get isPageDownDisabled(): boolean {
+    return !(this.footerModel[this.tab].curPage > 0
+      && (this.footerModel[this.tab].curPage - this.footerModel[this.tab].itemsPerPage) >= 0)
+  }
+
+  get isPageUpDisabled(): boolean {
+    return this.footerModel[this.tab].curPage
+      + this.footerModel[this.tab].itemsPerPage >= this.tablesModel[this.tab].rows.length
+
+  }
+
+  pageUp(): void {
+    if (!this.isPageUpDisabled) {
+      this.footerModel[this.tab].curPage = this.footerModel[this.tab].curPage + this.footerModel[this.tab].itemsPerPage;
+    }
+  }
+
+  pageDown(): void {
+    if (!this.isPageDownDisabled) {
+      this.footerModel[this.tab].curPage = this.footerModel[this.tab].curPage - this.footerModel[this.tab].itemsPerPage;
+    }
   }
 
   findColForSort(): Header {
