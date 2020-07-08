@@ -206,6 +206,7 @@ export default class App extends Vue {
 <style lang="scss">
   body {
     background-color: #fafafa;
+    width: 100%;
   }
 
   #app {
@@ -214,5 +215,6 @@ export default class App extends Vue {
     -moz-osx-font-smoothing: grayscale;
     color: #2c3e50;
     margin-top: 60px;
+    width: 100%;
   }
 </style>
