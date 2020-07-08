@@ -169,12 +169,17 @@
 
       <div class="table-footer">
         <div class="rows-count">
-          <select class="table-input table-input--items-count">
-            <option>5</option>
-            <option>10</option>
-            <option>20</option>
-            <option>All</option>
-          </select>
+
+          <div class="items-select">
+            <label class="items-count-label" for="items-count">Rows per page:</label>
+            <select id="items-count" class="table-input table-input--items-count">
+              <option>5</option>
+              <option>10</option>
+              <option>20</option>
+              <option>All</option>
+            </select>
+          </div>
+
           <span class="items-per-page">
             1-5 of {{tablesModel[tab].rows.length}}
           </span>
