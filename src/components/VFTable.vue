@@ -166,6 +166,28 @@
 
         </tbody>
       </table>
+
+      <div class="table-footer">
+        <div class="rows-count">
+          <select class="table-input table-input--items-count">
+            <option>5</option>
+            <option>10</option>
+            <option>20</option>
+            <option>All</option>
+          </select>
+          <span class="items-per-page">
+            1-5 of {{tablesModel[tab].rows.length}}
+          </span>
+        </div>
+        <div class="items-buttons">
+          <button class="item-button">
+            <i class="material-icons">chevron_left</i>
+          </button>
+          <button class="item-button">
+            <i class="material-icons">chevron_right</i>
+          </button>
+        </div>
+      </div>
     </div>
 
   </div>
@@ -400,228 +422,5 @@ export default class VFTable extends Vue {
 </script>
 
 <style scoped lang="scss">
-
-  *, *:before, *:after {
-    box-sizing: border-box;
-  }
-
-  .vf-table {
-    width: 100%;
-
-    .table-wrapper {
-      width: 100%;
-    }
-
-    .table-tabs {
-      display: flex;
-      align-items: center;
-    }
-
-    .table-tab {
-      position: relative;
-      border: 1px solid rgba(#0277BD, 0.3);
-      background-color: #fafafa;
-      color: #0277BD;
-      font-family: inherit;
-      font-size: 14px;
-      text-transform: uppercase;
-      border-radius: 0;
-      cursor: pointer;
-      width: 50%;
-      padding: 10px;
-      outline: none;
-      overflow: hidden;
-      transition: all 0.25s ease-in-out;
-
-      &.active {
-        background-color: rgba(#0277BD, 0.4);
-      }
-
-      &:hover {
-        background-color: rgba(#0277BD, 0.2);
-      }
-
-      &:after {
-        content: "";
-        background: #fafafa;
-        display: block;
-        position: absolute;
-        padding-top: 300%;
-        padding-left: 350%;
-        margin-left: -20px !important;
-        margin-top: -120%;
-        opacity: 0;
-        transition: all 0.8s
-      }
-
-      &:active:after {
-        padding: 0;
-        margin: 0;
-        opacity: 1;
-        transition: 0s
-      }
-    }
-
-    table {
-      border-collapse: collapse;
-      width: 100%;
-
-      thead {
-        color: #fafafa;
-      }
-
-      tbody {
-        border: solid 1px rgba(0, 0, 0, 0.12);
-        background-color: #ffffff;
-      }
-
-      th {
-        padding: 10px;
-        position: relative;
-        background-color: #0277BD;
-        font-weight: normal;
-
-        &:not(:last-child) {
-          border-right: 1px solid rgba(#fafafa, 0.12);
-        }
-
-        &.active {
-          color: #fafafa;
-          text-decoration: underline;
-        }
-
-        &.pointer {
-          cursor: pointer;
-        }
-
-        &.drag-dest {
-          background-color: #00629a;
-        }
-
-        .sort-buttons {
-          position: absolute;
-          top: 50%;
-          margin-top: calc(-25px / 2);
-          right: 2px;
-          width: 25px;
-          height: 25px;
-          display: flex;
-          flex-direction: column;
-          justify-content: space-between;
-        }
-
-        .sort-btn {
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          width: 25px;
-          height: 12px;
-          outline: none;
-          margin: 0;
-          padding: 0;
-          border: 0;
-          cursor: pointer;
-          background: transparent;
-          transition: all 0.25s ease-in-out;
-
-          &:hover {
-            .material-icons {
-              color: #e7dddd;
-            }
-          }
-
-          .material-icons {
-            line-height: 12px;
-            font-size: 25px;
-            color: rgba(#000000, 0.2);
-
-            &.active {
-              color: #fafafa;
-            }
-          }
-        }
-      }
-
-      .search-column-input {
-        position: relative;
-        width: 100%;
-
-        .search-column-icon {
-          position: absolute;
-          top: 4px;
-          left: 5px;
-          width: 21px;
-          height: 21px;
-          line-height: 21px;
-          font-size: 21px;
-          color: #0277BD;
-        }
-      }
-
-      td {
-        padding: 5px;
-        line-height: 28px;
-
-        &:not(:last-child) {
-          border-right: 1px solid rgba(#000000, 0.12);
-        }
-
-        &.no-match {
-          padding: 20px;
-        }
-      }
-
-      th, td {
-        text-align: center;
-        font-size: 14px;
-      }
-    }
-
-    tbody tr:nth-of-type(odd) {
-      background-color: rgba(#0277BD, 0.05);
-    }
-
-    .table-input {
-      outline: none;
-      padding: 5px;
-      text-align: center;
-      border: 1px solid rgba(#0277BD, 0.5);
-      min-width: 95%;
-      height: 28px;
-
-      &:focus {
-        outline: 2px solid #0277BD;
-      }
-
-      &--number {
-      }
-
-      &--ntext {
-      }
-
-      &--date {
-      }
-
-      &--select {
-        cursor: pointer;
-      }
-
-      &--column-search {
-        text-align: left;
-        min-width: 100%;
-        padding-left: 25px;
-        border-radius: 20px;
-
-        &:focus {
-          outline: none;
-          border: 2px solid #0277BD;
-        }
-      }
-    }
-
-    .table-checkbox {
-      cursor: pointer;
-    }
-  }
-
+  @import "./src/styles/vf-table-styles";
 </style>

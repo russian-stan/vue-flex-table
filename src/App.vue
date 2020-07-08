@@ -49,7 +49,7 @@ export default class App extends Vue {
       return new Date(start.getTime() + Math.random() * (end.getTime() - start.getTime())).toISOString().slice(0, 10);
     }
 
-    for (let i = 0; i < 100; i++) {
+    for (let i = 0; i < 10; i++) {
       rows.push(
         {
           brand: brands[Math.round(Math.abs(Math.random() * brands.length - 1))],
@@ -58,11 +58,10 @@ export default class App extends Vue {
           issue_date: randomDate(new Date(2012, 0, 1), new Date()),
           price: Math.round(Math.random() * 35000).toString(),
           for_sale: !!Math.round(Math.random()),
-          uid: i,
+          uid: Math.random().toString(12).substring(2),
         },
       )
     }
-
     return rows;
   }
 
@@ -127,44 +126,6 @@ export default class App extends Vue {
             order: 6,
           },
         ],
-        // rows: [
-        //   {
-        //     brand: 'Ford',
-        //     color: '1',
-        //     type: 'sedan',
-        //     issue_date: '2015-01-02',
-        //     price: '20000',
-        //     for_sale: true,
-        //     uid: '1',
-        //   },
-        //   {
-        //     brand: 'Mazda',
-        //     color: '2',
-        //     type: 'hatchback',
-        //     issue_date: '2018-01-02',
-        //     price: '50000',
-        //     for_sale: true,
-        //     uid: '2',
-        //   },
-        //   {
-        //     brand: 'BMW',
-        //     color: '3',
-        //     type: 'sedan',
-        //     issue_date: '2013-01-02',
-        //     price: '25000',
-        //     for_sale: false,
-        //     uid: '3',
-        //   },
-        //   {
-        //     brand: 'Audi',
-        //     color: '4',
-        //     type: 'sedan',
-        //     issue_date: '2017-01-02',
-        //     price: '55000',
-        //     for_sale: false,
-        //     uid: '5',
-        //   },
-        // ],
         rows: this.generateRows(),
       },
       {
@@ -235,6 +196,8 @@ export default class App extends Vue {
   body {
     background-color: #fafafa;
     width: 100%;
+    max-width: 1450px;
+    margin: 0 auto;
   }
 
   #app {
