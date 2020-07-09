@@ -23,7 +23,7 @@
      no-results-text="No matching records found"
      no-data-text="No data to display"
      :footer-props="{
-        itemsPerPageOptions: [5, 10, 20],
+        itemsPerPageOptions: [10, 20, 30],
         itemsPerPageText:'Rows per page',
         showFirstLastPage: true
      }"

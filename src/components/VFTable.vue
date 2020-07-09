@@ -102,7 +102,7 @@
         </tr>
         <template v-if="filteredItems.length">
           <tr
-           v-for="row in slicedItems"
+           v-for="(row, index) in slicedItems"
            :key="row.uid"
           >
             <td
@@ -131,13 +131,23 @@
                v-model="row[key]"
               >
 
-
-              <input
-               v-else-if="findColType(key) === 'checkbox'"
-               class="table-checkbox"
-               type="checkbox"
-               v-model="row[key]"
-              >
+              <template v-else-if="findColType(key) === 'checkbox'">
+                <input
+                 v-model="row[key]"
+                 class="table-checkbox"
+                 type="checkbox"
+                 style="display: none"
+                 :id="index"
+                />
+                <label :for="index" class="table-checkbox-label">
+                  <span>
+                    <svg width="12px" height="10px" viewbox="0 0 12 10">
+                      <polyline points="1.5 6 4.5 9 10.5 1"></polyline>
+                    </svg>
+                  </span>
+                  <span></span>
+                </label>
+              </template>
 
               <select
                v-else-if="findColType(key) === 'select' && selectsData[key]"
