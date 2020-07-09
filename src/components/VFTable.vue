@@ -438,31 +438,39 @@ export default class VFTable extends Vue {
   }
 
   get slicedItems(): Row[] {
-    return this.sortedItems.slice(
-      this.footerModel[this.tab].curPage,
-      this.footerModel[this.tab].curPage + this.footerModel[this.tab].itemsPerPage,
-    );
+    if (!this.hideDefaultFooter) {
+      return this.sortedItems.slice(
+        this.footerModel[this.tab].curPage,
+        this.footerModel[this.tab].curPage + this.footerModel[this.tab].itemsPerPage,
+      );
+    }
+    return this.sortedItems;
   }
 
   get isPageDownDisabled(): boolean {
-    return !(this.footerModel[this.tab].curPage > 0
-      && (this.footerModel[this.tab].curPage - this.footerModel[this.tab].itemsPerPage) >= 0);
+    if (!this.hideDefaultFooter) {
+      return !(this.footerModel[this.tab].curPage > 0
+        && (this.footerModel[this.tab].curPage - this.footerModel[this.tab].itemsPerPage) >= 0);
+    }
+    return true;
   }
 
   get isPageUpDisabled(): boolean {
-    return this.footerModel[this.tab].curPage
-      + this.footerModel[this.tab].itemsPerPage >= this.sortedItems.length;
-
+    if (!this.hideDefaultFooter) {
+      return this.footerModel[this.tab].curPage
+        + this.footerModel[this.tab].itemsPerPage >= this.sortedItems.length;
+    }
+    return true;
   }
 
   pageUp(): void {
-    if (!this.isPageUpDisabled) {
+    if (!this.isPageUpDisabled && !this.hideDefaultFooter) {
       this.footerModel[this.tab].curPage = this.footerModel[this.tab].curPage + this.footerModel[this.tab].itemsPerPage;
     }
   }
 
   pageDown(): void {
-    if (!this.isPageDownDisabled) {
+    if (!this.isPageDownDisabled && !this.hideDefaultFooter) {
       this.footerModel[this.tab].curPage = this.footerModel[this.tab].curPage - this.footerModel[this.tab].itemsPerPage;
     }
   }
