@@ -145,8 +145,8 @@
                       <polyline points="1.5 6 4.5 9 10.5 1"></polyline>
                     </svg>
                   </span>
-                    <!--Label name-->
-                    <span></span>
+                  <!--Label name-->
+                  <span></span>
                 </label>
               </template>
 
@@ -375,7 +375,7 @@ export default class VFTable extends Vue {
     });
   }
 
-  createFooterModel() {
+  createFooterModel(): void {
     this.tablesModel.forEach(() => {
       this.footerModel.push({
         itemsPerPage: this.footerProps.itemsPerPageOptions[0],
@@ -401,7 +401,7 @@ export default class VFTable extends Vue {
   }
 
   get isColumnFilterApplied(): boolean {
-    return Object.values(this.columnSearchValues[this.tab]).some(Boolean);
+    return Object.values(this.columnSearchValues[this.tab] || {}).some(Boolean);
   }
 
   get filteredColumns(): Row[] {
