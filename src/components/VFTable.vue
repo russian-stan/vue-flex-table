@@ -184,8 +184,8 @@
           <span class="items-per-page">
             {{footerModel[tab].curPage + 1}}
             -
-            {{!isPageUpDisabled ? footerModel[tab].curPage + footerModel[tab].itemsPerPage : tablesModel[tab].rows.length}}
-            of {{tablesModel[tab].rows.length}}
+            {{!isPageUpDisabled ? footerModel[tab].curPage + footerModel[tab].itemsPerPage : sortedItems.length}}
+            of {{sortedItems.length}}
           </span>
         </div>
         <div class="items-buttons">
@@ -446,12 +446,12 @@ export default class VFTable extends Vue {
 
   get isPageDownDisabled(): boolean {
     return !(this.footerModel[this.tab].curPage > 0
-      && (this.footerModel[this.tab].curPage - this.footerModel[this.tab].itemsPerPage) >= 0)
+      && (this.footerModel[this.tab].curPage - this.footerModel[this.tab].itemsPerPage) >= 0);
   }
 
   get isPageUpDisabled(): boolean {
     return this.footerModel[this.tab].curPage
-      + this.footerModel[this.tab].itemsPerPage >= this.tablesModel[this.tab].rows.length
+      + this.footerModel[this.tab].itemsPerPage >= this.sortedItems.length;
 
   }
 
