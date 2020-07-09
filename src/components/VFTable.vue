@@ -1,24 +1,25 @@
 <template>
   <div class="vf-table">
 
+    <div v-if="tables.length > 1" class="table-tabs">
+      <button
+       v-for="(table, index) in tables"
+       :key="table.label"
+       @click="tab = index"
+       class="table-tab"
+       :class="{'active': tab === index}"
+      >
+        {{table.label}}
+      </button>
+    </div>
     <div class="table-wrapper">
-      <div v-if="tables.length > 1" class="table-tabs">
-        <button
-         v-for="(table, index) in tables"
-         :key="table.label"
-         @click="tab = index"
-         class="table-tab"
-         :class="{'active': tab === index}"
-        >
-          {{table.label}}
-        </button>
-      </div>
-
       <table>
+        <!--======================= COLGROUP =======================-->
         <colgroup v-if="!isNoHeaders">
           <col
            v-for="header in tablesModel[tab].headers"
            :key="header.row_key"
+           :style="{'width': calculateColumnWidth(header.row_key)}"
           >
         </colgroup>
 
@@ -29,7 +30,6 @@
           <th
            v-for="header in tablesModel[tab].headers"
            :key="header.row_key"
-           :style="{'width': calculateColumnWidth(header.row_key)}"
            :class="{
              'active': header.sortable && header.row_key === currentColumnName[tab],
              'pointer': header.sortable
@@ -145,7 +145,8 @@
                       <polyline points="1.5 6 4.5 9 10.5 1"></polyline>
                     </svg>
                   </span>
-                  <span></span>
+                    <!--Label name-->
+                    <span></span>
                 </label>
               </template>
 
@@ -176,49 +177,47 @@
 
         </tbody>
       </table>
+    </div>
+    <div v-if="!hideDefaultFooter" class="table-footer">
+      <div class="rows-count">
 
-      <div v-if="!hideDefaultFooter" class="table-footer">
-        <div class="rows-count">
+        <div class="items-select">
+          <label class="items-count-label" for="items-count">Rows per page:</label>
+          <select
+           v-model.number="footerModel[tab].itemsPerPage"
+           id="items-count"
+           class="table-input table-input--items-count"
+          >
+            <option v-for="count in footerProps.itemsPerPageOptions" :key="count">{{count}}</option>
+          </select>
+        </div>
 
-          <div class="items-select">
-            <label class="items-count-label" for="items-count">Rows per page:</label>
-            <select
-             v-model.number="footerModel[tab].itemsPerPage"
-             id="items-count"
-             class="table-input table-input--items-count"
-            >
-              <option v-for="count in footerProps.itemsPerPageOptions" :key="count">{{count}}</option>
-            </select>
-          </div>
-
-          <span class="items-per-page">
+        <span class="items-per-page">
             {{footerModel[tab].curPage + 1}}
             -
             {{!isPageUpDisabled ? footerModel[tab].curPage + footerModel[tab].itemsPerPage : sortedItems.length}}
             of {{sortedItems.length}}
           </span>
-        </div>
-        <div class="items-buttons">
-          <button
-           @click="pageDown"
-           :disabled="isPageDownDisabled"
-           :class="{'disabled': isPageDownDisabled}"
-           class="item-button"
-          >
-            <i class="material-icons">chevron_left</i>
-          </button>
-          <button
-           @click="pageUp"
-           :disabled="isPageUpDisabled"
-           :class="{'disabled': isPageUpDisabled}"
-           class="item-button"
-          >
-            <i class="material-icons">chevron_right</i>
-          </button>
-        </div>
+      </div>
+      <div class="items-buttons">
+        <button
+         @click="pageDown"
+         :disabled="isPageDownDisabled"
+         :class="{'disabled': isPageDownDisabled}"
+         class="item-button"
+        >
+          <i class="material-icons">chevron_left</i>
+        </button>
+        <button
+         @click="pageUp"
+         :disabled="isPageUpDisabled"
+         :class="{'disabled': isPageUpDisabled}"
+         class="item-button"
+        >
+          <i class="material-icons">chevron_right</i>
+        </button>
       </div>
     </div>
-
   </div>
 </template>
 
