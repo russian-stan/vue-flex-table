@@ -12,11 +12,24 @@
       </button>
     </div>
 
+    <div v-if="data.tables.length > 1" class="table-tabs">
+      <button
+       v-for="(table, index) in data.tables"
+       :key="table.label"
+       @click="tab = index"
+       class="table-tab"
+       :class="{'active': tab === index}"
+      >
+        {{table.label}}
+      </button>
+    </div>
+
     <VFTable
      :tables="data.tables"
      :selectsData="data.selects_data"
+     :tab="tab"
      :search="search"
-     :column-search="columnSearch"
+     column-search
      countable
      ordered
      draggable
@@ -41,8 +54,8 @@ import VFTable from './components/VFTable.vue';
   },
 })
 export default class App extends Vue {
+  tab = 0;
   search = '';
-  columnSearch = true;
 
   generateRows() {
 
@@ -220,5 +233,55 @@ export default class App extends Vue {
     color: #2c3e50;
     margin-top: 60px;
     width: 100%;
+  }
+
+  .table-tabs {
+    display: flex;
+    align-items: center;
+  }
+
+  .table-tab {
+    position: relative;
+    border: 1px solid rgba(#0277BD, 0.3);
+    background-color: #fafafa;
+    color: #0277BD;
+    font-family: inherit;
+    font-size: 14px;
+    text-transform: uppercase;
+    border-radius: 0;
+    cursor: pointer;
+    width: 50%;
+    padding: 10px;
+    outline: none;
+    overflow: hidden;
+    transition: all 0.25s ease-in-out;
+
+    &.active {
+      background-color: rgba(#0277BD, 0.4);
+    }
+
+    &:hover {
+      background-color: rgba(#0277BD, 0.2);
+    }
+
+    &:after {
+      content: "";
+      background: #fafafa;
+      display: block;
+      position: absolute;
+      padding-top: 300%;
+      padding-left: 350%;
+      margin-left: -20px !important;
+      margin-top: -120%;
+      opacity: 0;
+      transition: all 0.8s
+    }
+
+    &:active:after {
+      padding: 0;
+      margin: 0;
+      opacity: 1;
+      transition: 0s
+    }
   }
 </style>

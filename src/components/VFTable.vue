@@ -1,17 +1,5 @@
 <template>
   <div class="vf-table">
-
-    <div v-if="tables.length > 1" class="table-tabs">
-      <button
-       v-for="(table, index) in tables"
-       :key="table.label"
-       @click="tab = index"
-       class="table-tab"
-       :class="{'active': tab === index}"
-      >
-        {{table.label}}
-      </button>
-    </div>
     <div class="table-wrapper">
       <table>
         <!--======================= COLGROUP =======================-->
@@ -253,6 +241,7 @@ export default class VFTable extends Vue {
       }
     },
   }) private readonly footerProps!: FooterProps;
+  @Prop({ type: Number, default: 0 }) private readonly tab!: number;
   @Prop({ type: String, default: '' }) private readonly search!: string;
   @Prop({ type: Boolean, default: false }) private readonly ordered!: boolean;
   @Prop({ type: Boolean, default: false }) private readonly countable!: boolean;
@@ -263,7 +252,6 @@ export default class VFTable extends Vue {
   @Prop({ type: String, default: 'No matching records found' }) private readonly noResultsText!: string;
   @Ref('headers') readonly headers!: HTMLTableHeaderCellElement[];
 
-  tab = 0;
   footerModel: Array<FooterModel> = [];
   tablesModel: Array<VTable> = [];
   currentColumnName: string[] = [];
