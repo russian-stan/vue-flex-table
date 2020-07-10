@@ -189,6 +189,14 @@
       </div>
       <div class="items-buttons">
         <button
+         v-if="footerProps.showFirstLastPage"
+         class="item-button"
+         :class="{'disabled': isPageDownDisabled}"
+         @click="goToPage('first')"
+        >
+          <i class="material-icons">first_page</i>
+        </button>
+        <button
          @click="pageDown"
          :disabled="isPageDownDisabled"
          :class="{'disabled': isPageDownDisabled}"
@@ -203,6 +211,14 @@
          class="item-button"
         >
           <i class="material-icons">chevron_right</i>
+        </button>
+        <button
+         v-if="footerProps.showFirstLastPage"
+         class="item-button"
+         :class="{'disabled': isPageUpDisabled}"
+         @click="goToPage('last')"
+        >
+          <i class="material-icons">last_page</i>
         </button>
       </div>
     </div>
@@ -237,7 +253,7 @@ export default class VFTable extends Vue {
       return {
         itemsPerPageOptions: [10],
         itemsPerPageText: 'Rows per page',
-        showFirstLastPage: true,
+        showFirstLastPage: false,
       }
     },
   }) private readonly footerProps!: FooterProps;
@@ -470,6 +486,11 @@ export default class VFTable extends Vue {
     if (!this.isPageDownDisabled && !this.hideDefaultFooter) {
       this.footerModel[this.tab].curPage = this.footerModel[this.tab].curPage - this.footerModel[this.tab].itemsPerPage;
     }
+  }
+
+  goToPage(page: 'first' | 'last'): void {
+    if (page === 'first') this.footerModel[this.tab].curPage = 0;
+    if (page === 'last') this.footerModel[this.tab].curPage = this.sortedItems.length - 1;
   }
 
   findColForSort(): Header {

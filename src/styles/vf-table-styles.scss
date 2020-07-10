@@ -226,7 +226,6 @@
     }
 
     .items-buttons {
-      width: 80px;
       display: flex;
       align-items: center;
       justify-content: space-between;
@@ -241,6 +240,8 @@
         font-family: inherit;
         font-size: 14px;
         text-transform: uppercase;
+        padding: 0 5px;
+        margin: 0 5px;
         border-radius: 50%;
         border: 0;
         cursor: pointer;
