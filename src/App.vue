@@ -1,5 +1,7 @@
 <template>
   <div id="app">
+
+    <!--TABLE-SEARCH-->
     <label>
       Search
       <input v-model.trim="search" type="text" style="margin-bottom: 20px; width: 200px;">
@@ -12,6 +14,27 @@
       </button>
     </div>
 
+    <!--COLUMNS-CHECKBOXES-->
+    <div v-if="selectedColumns.length" style="margin: 20px 0;">
+      <label
+       style="cursor: pointer; margin-right: 20px;"
+       v-for="cb in data.tables[tab].headers"
+       :key="cb.row_key"
+       :for="cb.row_key"
+      >
+        <input
+         style="cursor: pointer;"
+         :id="cb.row_key"
+         type="checkbox"
+         :value="cb.row_key"
+         v-model="selectedColumns[tab]"
+         :disabled="selectedColumns[tab].includes(cb.row_key) && selectedColumns[tab].length === 2"
+        >
+        {{cb.text}}
+      </label>
+    </div>
+
+    <!--TABLE-TABS-->
     <div v-if="data.tables.length > 1" class="table-tabs">
       <button
        v-for="(table, index) in data.tables"
@@ -29,7 +52,8 @@
      :selectsData="data.selects_data"
      :tab="tab"
      :search="search"
-     column-search
+     :column-search="columnSearch"
+     :selectedColumns="selectedColumns"
      countable
      ordered
      draggable
@@ -40,6 +64,7 @@
         itemsPerPageText:'Rows per page',
         showFirstLastPage: true
      }"
+     @submitColumnsKeys="fillSelectedColumns($event)"
     />
   </div>
 </template>
@@ -56,6 +81,12 @@ import VFTable from './components/VFTable.vue';
 export default class App extends Vue {
   tab = 0;
   search = '';
+  columnSearch = true;
+  selectedColumns: Array<string[]> = [];
+
+  fillSelectedColumns(columnKeys: Array<string[]>) {
+   this.selectedColumns = columnKeys;
+  }
 
   generateRows() {
 

@@ -1,7 +1,8 @@
 <template>
   <div class="vf-table">
     <div class="table-wrapper">
-      <table>
+      <table v-if="selectedColumns.length">
+
         <!--======================= COLGROUP =======================-->
         <colgroup v-if="!isNoHeaders">
           <col
@@ -20,7 +21,10 @@
            :key="header.row_key"
            :class="{
              'active': header.sortable && header.row_key === currentColumnName[tab],
-             'pointer': header.sortable
+             'pointer': header.sortable,
+             'hidden': selectedColumns[tab].length ?
+               !selectedColumns[tab].includes(header.row_key)
+               : !rowKeys.includes(header.row_key),
            }"
            ref="headers"
            :draggable="draggable"
@@ -72,10 +76,15 @@
 
         <tbody>
         <!--======================= ROWS =======================-->
-        <tr v-if="columnSearch">
+        <tr class="column-search-row" v-if="columnSearch">
           <td
            v-for="(searchInput, index) in tablesModel[tab].headers"
            :key="index"
+           :class="{
+             'hidden': selectedColumns[tab].length ?
+               !selectedColumns[tab].includes(searchInput.row_key)
+               : !rowKeys.includes(searchInput.row_key)
+           }"
           >
             <div v-if="searchInput.filterable" class="search-column-input">
               <i class="material-icons search-column-icon">search</i>
@@ -96,6 +105,11 @@
             <td
              v-for="key in rowKeys"
              :key="key"
+             :class="{
+             'hidden': selectedColumns[tab].length ?
+               !selectedColumns[tab].includes(key)
+               : !rowKeys.includes(key)
+           }"
             >
               <input
                v-if="findColType(key) === 'number'"
@@ -166,6 +180,7 @@
         </tbody>
       </table>
     </div>
+    <!--======================= FOOTER =======================-->
     <div v-if="!hideDefaultFooter" class="table-footer">
       <div class="rows-count">
 
@@ -266,6 +281,11 @@ export default class VFTable extends Vue {
   @Prop({ type: Boolean, default: false }) private readonly hideDefaultFooter!: boolean;
   @Prop({ type: String, default: 'No data to display' }) private readonly noDataText!: string;
   @Prop({ type: String, default: 'No matching records found' }) private readonly noResultsText!: string;
+  @Prop({
+    type: Array, default() {
+      return [[]]
+    },
+  }) private readonly selectedColumns!: Array<string[]>;
   @Ref('headers') readonly headers!: HTMLTableHeaderCellElement[];
 
   footerModel: Array<FooterModel> = [];
@@ -292,6 +312,36 @@ export default class VFTable extends Vue {
 
     // 6. OPTIONAL Set footer model
     if (!this.hideDefaultFooter) this.createFooterModel();
+
+    // 7. Emit column keys array list for each table
+      this.$emit('submitColumnsKeys', this.createColumnKeys());
+  }
+
+  get isNoData(): boolean {
+    return !Boolean(this.tables[this.tab].rows?.length);
+  }
+
+  get isNoHeaders(): boolean {
+    return !Boolean(this.tables[this.tab].headers?.length);
+  }
+
+  get rowKeys(): Array<string> {
+    return this.tablesModel[this.tab].headers.reduce((acc: Array<string>, header: Header) => {
+      const prop = Object.keys(header).find(prop => prop === 'row_key');
+      if (prop && prop === 'row_key') acc.push(header[prop]);
+      return acc;
+    }, [])
+  }
+
+  createColumnKeys(): Array<string[]> {
+    return this.tablesModel.reduce((res: Array<string[]>, table) => {
+      const headerKeys = table.headers.reduce((acc: string[], header) => {
+        acc.push(header.row_key);
+        return acc;
+      }, [])
+      res.push(headerKeys);
+      return res;
+    }, [])
   }
 
   onDragStart(evt: DragEvent, targetIndex: number) {
@@ -350,6 +400,30 @@ export default class VFTable extends Vue {
     return (100 / columnsCount) + '%';
   }
 
+  findColForSort(): Header {
+    return this.tablesModel[this.tab].headers
+      .find(header => header.row_key === this.currentColumnName[this.tab])!;
+  }
+
+  findColType(key: string): ColType | undefined {
+    const row = this.tablesModel[this.tab].headers.find(col => col.row_key === key);
+    if (row) return row.hasOwnProperty('col_type') ? row['col_type'] : undefined;
+    return undefined;
+  }
+
+  sortBy(colName: string): void {
+    if (this.currentColumnName[this.tab] !== colName) {
+      this.$set(this.currentColumnName, this.tab, colName);
+      this.currentColumnDir = this.findColForSort()!.sort_dir || 'asc';
+    }
+  }
+
+  changeSortDirForCurCol(colName: string, dir: SortDir): void {
+    this.currentColumnDir = dir;
+    this.currentColumnName[this.tab] = colName;
+    this.findColForSort()!.sort_dir = dir;
+  }
+
   sortColumnsByOrder(): void {
     this.tablesModel.forEach(table => table.headers.sort((a, b) => {
       if (a.hasOwnProperty('order') && b.hasOwnProperty('order')) {
@@ -386,22 +460,6 @@ export default class VFTable extends Vue {
         curPage: 0,
       })
     });
-  }
-
-  get isNoData(): boolean {
-    return !Boolean(this.tables[this.tab].rows?.length);
-  }
-
-  get isNoHeaders(): boolean {
-    return !Boolean(this.tables[this.tab].headers?.length);
-  }
-
-  get rowKeys(): Array<string> {
-    return this.tablesModel[this.tab].headers.reduce((acc: Array<string>, header: Header) => {
-      const prop = Object.keys(header).find(prop => prop === 'row_key');
-      if (prop && prop === 'row_key') acc.push(header[prop]);
-      return acc;
-    }, [])
   }
 
   get isColumnFilterApplied(): boolean {
@@ -491,30 +549,6 @@ export default class VFTable extends Vue {
   goToPage(page: 'first' | 'last'): void {
     if (page === 'first') this.footerModel[this.tab].curPage = 0;
     if (page === 'last') this.footerModel[this.tab].curPage = this.sortedItems.length - 1;
-  }
-
-  findColForSort(): Header {
-    return this.tablesModel[this.tab].headers
-      .find(header => header.row_key === this.currentColumnName[this.tab])!;
-  }
-
-  sortBy(colName: string): void {
-    if (this.currentColumnName[this.tab] !== colName) {
-      this.$set(this.currentColumnName, this.tab, colName);
-      this.currentColumnDir = this.findColForSort()!.sort_dir || 'asc';
-    }
-  }
-
-  changeSortDirForCurCol(colName: string, dir: SortDir): void {
-    this.currentColumnDir = dir;
-    this.currentColumnName[this.tab] = colName;
-    this.findColForSort()!.sort_dir = dir;
-  }
-
-  findColType(key: string): ColType | undefined {
-    const row = this.tablesModel[this.tab].headers.find(col => col.row_key === key);
-    if (row) return row.hasOwnProperty('col_type') ? row['col_type'] : undefined;
-    return undefined;
   }
 }
 </script>
