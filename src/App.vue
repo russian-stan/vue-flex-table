@@ -15,10 +15,10 @@
     </div>
 
     <!--COLUMNS-CHECKBOXES-->
-    <div v-if="selectedColumns.length" style="margin: 20px 0;">
+    <div v-if="selectedColumnsModel.length && checkboxesData.length" style="margin: 20px 0;">
       <label
        style="cursor: pointer; margin-right: 20px;"
-       v-for="cb in data.tables[tab].headers"
+       v-for="cb in checkboxesData[tab]"
        :key="cb.row_key"
        :for="cb.row_key"
       >
@@ -27,8 +27,8 @@
          :id="cb.row_key"
          type="checkbox"
          :value="cb.row_key"
-         v-model="selectedColumns[tab]"
-         :disabled="selectedColumns[tab].includes(cb.row_key) && selectedColumns[tab].length === 2"
+         v-model="selectedColumnsModel[tab]"
+         :disabled="selectedColumnsModel[tab].includes(cb.row_key) && selectedColumnsModel[tab].length === 1"
         >
         {{cb.text}}
       </label>
@@ -53,7 +53,7 @@
      :tab="tab"
      :search="search"
      :column-search="columnSearch"
-     :selectedColumns="selectedColumns"
+     :selectedColumnsModel="selectedColumnsModel"
      countable
      ordered
      draggable
@@ -64,7 +64,8 @@
         itemsPerPageText:'Rows per page',
         showFirstLastPage: true
      }"
-     @submitColumnsKeys="fillSelectedColumns($event)"
+     @submitColumnsKeys="selectedColumnsModel = $event"
+     @submitCheckboxesData="checkboxesData = $event"
     />
   </div>
 </template>
@@ -82,14 +83,10 @@ export default class App extends Vue {
   tab = 0;
   search = '';
   columnSearch = true;
-  selectedColumns: Array<string[]> = [];
-
-  fillSelectedColumns(columnKeys: Array<string[]>) {
-   this.selectedColumns = columnKeys;
-  }
+  selectedColumnsModel: Array<string[]> = [];
+  checkboxesData: Array<{ row_key: string; text: string; }[]> = [];
 
   generateRows() {
-
     const rows = [];
     const brands = ['Ford', 'Mazda', 'Mercedes', 'Audi', 'Volkswagen', 'Renault', 'Mitsubishi', 'Volvo'];
     const type = ['sedan', 'hatchback', 'coupe'];

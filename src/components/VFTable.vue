@@ -1,7 +1,7 @@
 <template>
   <div class="vf-table">
     <div class="table-wrapper">
-      <table v-if="selectedColumns.length">
+      <table v-if="selectedColumnsModel.length">
 
         <!--======================= COLGROUP =======================-->
         <colgroup v-if="!isNoHeaders">
@@ -22,8 +22,8 @@
            :class="{
              'active': header.sortable && header.row_key === currentColumnName[tab],
              'pointer': header.sortable,
-             'hidden': selectedColumns[tab].length ?
-               !selectedColumns[tab].includes(header.row_key)
+             'hidden': selectedColumnsModel[tab].length ?
+               !selectedColumnsModel[tab].includes(header.row_key)
                : !rowKeys.includes(header.row_key),
            }"
            ref="headers"
@@ -81,8 +81,8 @@
            v-for="(searchInput, index) in tablesModel[tab].headers"
            :key="index"
            :class="{
-             'hidden': selectedColumns[tab].length ?
-               !selectedColumns[tab].includes(searchInput.row_key)
+             'hidden': selectedColumnsModel[tab].length ?
+               !selectedColumnsModel[tab].includes(searchInput.row_key)
                : !rowKeys.includes(searchInput.row_key)
            }"
           >
@@ -106,8 +106,8 @@
              v-for="key in rowKeys"
              :key="key"
              :class="{
-             'hidden': selectedColumns[tab].length ?
-               !selectedColumns[tab].includes(key)
+             'hidden': selectedColumnsModel[tab].length ?
+               !selectedColumnsModel[tab].includes(key)
                : !rowKeys.includes(key)
            }"
             >
@@ -285,7 +285,7 @@ export default class VFTable extends Vue {
     type: Array, default() {
       return [[]]
     },
-  }) private readonly selectedColumns!: Array<string[]>;
+  }) private readonly selectedColumnsModel!: Array<string[]>;
   @Ref('headers') readonly headers!: HTMLTableHeaderCellElement[];
 
   footerModel: Array<FooterModel> = [];
@@ -313,8 +313,11 @@ export default class VFTable extends Vue {
     // 6. OPTIONAL Set footer model
     if (!this.hideDefaultFooter) this.createFooterModel();
 
-    // 7. Emit column keys array list for each table
-      this.$emit('submitColumnsKeys', this.createColumnKeys());
+    // 7. Emit cb keys array list for each table
+    this.$emit('submitColumnsKeys', this.createCheckboxesModelKeys());
+
+    // 8. Emit cb keys array data for each table
+    this.$emit('submitCheckboxesData', this.createCheckboxesData());
   }
 
   get isNoData(): boolean {
@@ -333,13 +336,27 @@ export default class VFTable extends Vue {
     }, [])
   }
 
-  createColumnKeys(): Array<string[]> {
+  createCheckboxesModelKeys(): Array<string[]> {
     return this.tablesModel.reduce((res: Array<string[]>, table) => {
       const headerKeys = table.headers.reduce((acc: string[], header) => {
         acc.push(header.row_key);
         return acc;
       }, [])
       res.push(headerKeys);
+      return res;
+    }, [])
+  }
+
+  createCheckboxesData(): Array<{ row_key: string; text: string; }[]> {
+    return this.tablesModel.reduce((res: Array<{ row_key: string; text: string; }[]>, table) => {
+      const cbData = table.headers.reduce((acc: { row_key: string; text: string; }[], header) => {
+        acc.push({
+          row_key: header.row_key,
+          text: header.text,
+        });
+        return acc;
+      }, [])
+      res.push(cbData);
       return res;
     }, [])
   }
