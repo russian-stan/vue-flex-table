@@ -1,9 +1,7 @@
 <template>
   <div id="app">
-
     <!--TABLE-SEARCH-->
     <label>
-      Search
       <input v-model.trim="search" type="text" style="margin-bottom: 20px; width: 200px;">
     </label>
     <div style="margin: 20px 0;">
@@ -83,7 +81,7 @@ export default class App extends Vue {
   tab = 0;
   search = '';
   columnSearch = true;
-  selectedColumnsModel: Array<string[]> = [];
+  selectedColumnsModel: Array<string[]> = [[]];
   checkboxesData: Array<{ row_key: string; text: string; }[]> = [];
 
   generateRows() {

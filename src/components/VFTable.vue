@@ -299,25 +299,25 @@ export default class VFTable extends Vue {
     this.tablesModel = copyDeep<VTable[]>(this.tables);
 
     // 2. OPTIONAL: Add column count and number {count: number} for each row in table
-    if (this.countable) this.addCount();
+    if (this.countable && !this.isNoData) this.addCount();
 
     // 3. OPTIONAL: Sort columns by order
-    if (this.ordered) this.sortColumnsByOrder();
+    if (this.ordered && !this.isNoData) this.sortColumnsByOrder();
 
     // 4. Add default {sort_dir: 'asc'} for sorting
-    this.addSortDirToRow();
+    if (!this.isNoData) this.addSortDirToRow();
 
-    // 5. create search model for dropdowns
-    this.createColumnsSearchModel();
+    // 5. create search model
+    if (!this.isNoData) this.createColumnsSearchModel();
 
     // 6. OPTIONAL Set footer model
     if (!this.hideDefaultFooter) this.createFooterModel();
 
-    // 7. Emit cb keys array list for each table
-    this.$emit('submitColumnsKeys', this.createCheckboxesModelKeys());
+    // 7. Emit cb keys array data for each table
+    if (!this.isNoData) this.$emit('submitCheckboxesData', this.createCheckboxesData());
 
-    // 8. Emit cb keys array data for each table
-    this.$emit('submitCheckboxesData', this.createCheckboxesData());
+    // 8. Emit cb keys array list for each table
+    if (!this.isNoData) this.$emit('submitColumnsKeys', this.createCheckboxesModelKeys());
   }
 
   get isNoData(): boolean {
