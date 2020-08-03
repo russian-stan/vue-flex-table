@@ -1,4 +1,4 @@
-export type SortDir = 'asc' | 'desc';
+export type SortDir = 'asc' | 'desc' | null;
 export type ColType = 'text' | 'number' | 'date' | 'select' | 'checkbox';
 
 export interface Header {

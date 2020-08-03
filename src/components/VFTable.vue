@@ -1,7 +1,7 @@
 <template>
   <div class="vf-table">
     <div class="table-wrapper">
-      <table v-if="selectedColumnsModel.length">
+      <table>
 
         <!--======================= COLGROUP =======================-->
         <colgroup v-if="!isNoHeaders">
@@ -22,7 +22,7 @@
            :class="{
              'active': header.sortable && header.row_key === currentColumnName[tab],
              'pointer': header.sortable,
-             'hidden': selectedColumnsModel[tab].length ?
+             'hidden': selectedColumnsModel.length ?
                !selectedColumnsModel[tab].includes(header.row_key)
                : !rowKeys.includes(header.row_key),
            }"
@@ -81,7 +81,7 @@
            v-for="(searchInput, index) in tablesModel[tab].headers"
            :key="index"
            :class="{
-             'hidden': selectedColumnsModel[tab].length ?
+             'hidden': selectedColumnsModel.length ?
                !selectedColumnsModel[tab].includes(searchInput.row_key)
                : !rowKeys.includes(searchInput.row_key)
            }"
@@ -103,23 +103,23 @@
            :key="row.uid"
           >
             <td
-             v-for="key in rowKeys"
+             v-for="(key, idx) in rowKeys"
              :key="key"
              :class="{
-             'hidden': selectedColumnsModel[tab].length ?
+             'hidden': selectedColumnsModel.length ?
                !selectedColumnsModel[tab].includes(key)
                : !rowKeys.includes(key)
            }"
             >
               <input
-               v-if="findColType(key) === 'number'"
+               v-if="tablesModel[tab].headers[idx].col_type === 'number'"
                class="table-input table-input--number"
                type="number"
                v-model="row[key]"
               >
 
               <input
-               v-else-if="findColType(key) === 'text'"
+               v-else-if="tablesModel[tab].headers[idx].col_type === 'text'"
                class="table-input table-input--text"
                type="text"
                v-model="row[key]"
@@ -127,13 +127,13 @@
 
 
               <input
-               v-else-if="findColType(key) === 'date'"
+               v-else-if="tablesModel[tab].headers[idx].col_type === 'date'"
                class="table-input table-input--date"
                type="date"
                v-model="row[key]"
               >
 
-              <template v-else-if="findColType(key) === 'checkbox'">
+              <template v-else-if="tablesModel[tab].headers[idx].col_type === 'checkbox'">
                 <input
                  v-model="row[key]"
                  class="table-checkbox"
@@ -153,12 +153,12 @@
               </template>
 
               <select
-               v-else-if="findColType(key) === 'select' && selectsData[key]"
+               v-else-if="tablesModel[tab].headers[idx].col_type === 'select' && selectsData[key]"
                class="table-input table-input--select"
                v-model="row[key]"
               >
                 <option disabled value="">Choice an option</option>
-                <option v-for="option in selectsData[key]" :value="option.id">
+                <option v-for="option in selectsData[key]" :key="option.id" :value="option.id">
                   {{option.text}}
                 </option>
               </select>
@@ -242,36 +242,42 @@
 
 <script lang="ts">
 import { Component, Prop, Ref, Vue } from 'vue-property-decorator';
-import { copyDeep } from '@/helpers/copyDeep';
 import { ColType, Header, Row, SelectsData, SortDir, FooterProps, FooterModel, VTable } from '@/types/tableTypes';
+import { cloneDeep } from 'lodash';
 
 @Component
 export default class VFTable extends Vue {
   @Prop({
-    type: Array, default() {
+    type: Array,
+    default() {
       return [
         {
           label: '',
           headers: [],
           rows: [],
         },
-      ]
+      ];
     },
   }) private readonly tables!: Array<VTable>;
+
   @Prop({
-    type: Object, default() {
-      return {}
+    type: Object,
+    default() {
+      return {};
     },
   }) private readonly selectsData!: SelectsData;
+
   @Prop({
-    type: Object, default() {
+    type: Object,
+    default() {
       return {
         itemsPerPageOptions: [10],
         itemsPerPageText: 'Rows per page',
         showFirstLastPage: false,
-      }
+      };
     },
   }) private readonly footerProps!: FooterProps;
+
   @Prop({ type: Number, default: 0 }) private readonly tab!: number;
   @Prop({ type: String, default: '' }) private readonly search!: string;
   @Prop({ type: Boolean, default: false }) private readonly ordered!: boolean;
@@ -282,10 +288,12 @@ export default class VFTable extends Vue {
   @Prop({ type: String, default: 'No data to display' }) private readonly noDataText!: string;
   @Prop({ type: String, default: 'No matching records found' }) private readonly noResultsText!: string;
   @Prop({
-    type: Array, default() {
-      return [[]]
+    type: Array,
+    default() {
+      return [];
     },
   }) private readonly selectedColumnsModel!: Array<string[]>;
+
   @Ref('headers') readonly headers!: HTMLTableHeaderCellElement[];
 
   footerModel: Array<FooterModel> = [];
@@ -296,7 +304,7 @@ export default class VFTable extends Vue {
 
   created() {
     // 1. Clone data
-    this.tablesModel = copyDeep<VTable[]>(this.tables);
+    this.tablesModel = cloneDeep(this.tables);
 
     // 2. OPTIONAL: Add column count and number {count: number} for each row in table
     if (this.countable && !this.isNoData) this.addCount();
@@ -321,11 +329,11 @@ export default class VFTable extends Vue {
   }
 
   get isNoData(): boolean {
-    return !Boolean(this.tables[this.tab].rows?.length);
+    return !this.tables[this.tab].rows?.length;
   }
 
   get isNoHeaders(): boolean {
-    return !Boolean(this.tables[this.tab].headers?.length);
+    return !this.tables[this.tab].headers?.length;
   }
 
   get rowKeys(): Array<string> {
@@ -333,7 +341,7 @@ export default class VFTable extends Vue {
       const prop = Object.keys(header).find(prop => prop === 'row_key');
       if (prop && prop === 'row_key') acc.push(header[prop]);
       return acc;
-    }, [])
+    }, []);
   }
 
   createCheckboxesModelKeys(): Array<string[]> {
@@ -341,24 +349,24 @@ export default class VFTable extends Vue {
       const headerKeys = table.headers.reduce((acc: string[], header) => {
         acc.push(header.row_key);
         return acc;
-      }, [])
+      }, []);
       res.push(headerKeys);
       return res;
-    }, [])
+    }, []);
   }
 
-  createCheckboxesData(): Array<{ row_key: string; text: string; }[]> {
-    return this.tablesModel.reduce((res: Array<{ row_key: string; text: string; }[]>, table) => {
-      const cbData = table.headers.reduce((acc: { row_key: string; text: string; }[], header) => {
+  createCheckboxesData(): Array<{ row_key: string; text: string }[]> {
+    return this.tablesModel.reduce((res: Array<{ row_key: string; text: string }[]>, table) => {
+      const cbData = table.headers.reduce((acc: { row_key: string; text: string }[], header) => {
         acc.push({
           row_key: header.row_key,
           text: header.text,
         });
         return acc;
-      }, [])
+      }, []);
       res.push(cbData);
       return res;
-    }, [])
+    }, []);
   }
 
   onDragStart(evt: DragEvent, targetIndex: number) {
@@ -368,7 +376,7 @@ export default class VFTable extends Vue {
   }
 
   onDragEnter(evt: DragEvent) {
-    (evt.target! as HTMLTableHeaderCellElement).classList.add('drag-dest')
+    (evt.target! as HTMLTableHeaderCellElement).classList.add('drag-dest');
   }
 
   onDragOver(evt: DragEvent) {
@@ -381,13 +389,13 @@ export default class VFTable extends Vue {
 
   onDrop(evt: DragEvent, destinationIndex: number) {
     const targetIndex = evt.dataTransfer!.getData('targetIndex');
-    this.swapColumns(+targetIndex, destinationIndex)
+    this.swapColumns(+targetIndex, destinationIndex);
   }
 
   onDragEnd(evt: DragEvent) {
     (evt.target! as HTMLTableHeaderCellElement).style.opacity = '';
     this.headers.forEach(header => {
-      header.classList.remove('drag-dest')
+      header.classList.remove('drag-dest');
     });
   }
 
@@ -403,29 +411,29 @@ export default class VFTable extends Vue {
 
   addCount(): void {
     const order = this.ordered ? { order: 0 } : {};
-    this.tablesModel.forEach(table => table.headers.push({ text: '№', row_key: 'count', sortable: true, ...order }));
-    this.tablesModel.forEach(table => table.rows.forEach((row, index) => row.count = `${index + 1}`));
+    this.tablesModel.forEach(table => table.headers.push({
+      text: '№', row_key: 'count', sortable: true, ...order,
+    }));
+    this.tablesModel.forEach(table => {
+      table.rows.forEach((row, index) => {
+        row.count = `${index + 1}`;
+      });
+    });
   }
 
   calculateColumnWidth(rowKey: string): string {
     const countColumnWidth = 7;
     const columnsCount = this.tablesModel[this.tab].headers.length;
     if (this.ordered) {
-      if (rowKey === 'count') return countColumnWidth + '%';
-      return ((100 - countColumnWidth) / (columnsCount - 1)) + '%';
+      if (rowKey === 'count') return `${countColumnWidth}%`;
+      return `${(100 - countColumnWidth) / (columnsCount - 1)}%`;
     }
-    return (100 / columnsCount) + '%';
+    return `${100 / columnsCount}%`;
   }
 
   findColForSort(): Header {
     return this.tablesModel[this.tab].headers
       .find(header => header.row_key === this.currentColumnName[this.tab])!;
-  }
-
-  findColType(key: string): ColType | undefined {
-    const row = this.tablesModel[this.tab].headers.find(col => col.row_key === key);
-    if (row) return row.hasOwnProperty('col_type') ? row['col_type'] : undefined;
-    return undefined;
   }
 
   sortBy(colName: string): void {
@@ -443,30 +451,33 @@ export default class VFTable extends Vue {
 
   sortColumnsByOrder(): void {
     this.tablesModel.forEach(table => table.headers.sort((a, b) => {
-      if (a.hasOwnProperty('order') && b.hasOwnProperty('order')) {
+      if ('order' in a && 'order' in b) {
         return a.order! - b.order!;
-      } else {
-        return 0;
       }
+      return 0;
     }));
   }
 
   addSortDirToRow(): void {
     this.tablesModel.forEach(table => table.headers.forEach(header => {
-      header.sortable ? header.sort_dir = 'asc' : null;
+      if (header.sortable) {
+        header.sort_dir = 'asc';
+      } else {
+        header.sort_dir = null;
+      }
     }));
   }
 
   createColumnsSearchModel(): void {
     this.tablesModel.forEach((table, index) => {
-      if (table.headers.some(header => header.hasOwnProperty('filterable'))) {
-        this.columnSearchValues.push({})
+      if (table.headers.some(header => 'filterable' in header)) {
+        this.columnSearchValues.push({});
       }
       table.headers.forEach(header => {
         if (header.filterable) {
-          this.$set(this.columnSearchValues[index], `${[header.row_key]}`, '')
+          this.$set(this.columnSearchValues[index], `${[header.row_key]}`, '');
         }
-      })
+      });
     });
   }
 
@@ -475,7 +486,7 @@ export default class VFTable extends Vue {
       this.footerModel.push({
         itemsPerPage: this.footerProps.itemsPerPageOptions[0],
         curPage: 0,
-      })
+      });
     });
   }
 
@@ -486,15 +497,17 @@ export default class VFTable extends Vue {
   get filteredColumns(): Row[] {
     if (this.isColumnFilterApplied) {
       let filtered: Row[] = [];
-      let temp: Row[] = copyDeep<Row[]>(this.tablesModel[this.tab].rows);
+      let temp: Row[] = cloneDeep(this.tablesModel[this.tab].rows);
 
-      for (let prop in this.columnSearchValues[this.tab]) {
-        if (!this.columnSearchValues[this.tab][prop]) continue;
-        filtered = temp.filter(row => {
-          return row[prop].toString().toLowerCase().includes(this.columnSearchValues[this.tab][prop].toLowerCase())
-        })
+      Object.keys(this.columnSearchValues[this.tab]).forEach(prop => {
+        if (!this.columnSearchValues[this.tab][prop]) return;
+        filtered = temp.filter(row => row[prop]
+          .toString()
+          .toLowerCase()
+          .includes(this.columnSearchValues[this.tab][prop].toLowerCase()));
         temp = filtered;
-      }
+      });
+
       return filtered;
     }
     return this.tablesModel[this.tab].rows;
@@ -502,9 +515,8 @@ export default class VFTable extends Vue {
 
   get filteredItems(): Row[] {
     if (this.search) {
-      return this.filteredColumns.filter(item => {
-        return Object.values(item).some(item => item.toString().toLowerCase().includes(this.search.toLowerCase()))
-      })
+      return this.filteredColumns
+        .filter(item => Object.values(item).some(item => item.toString().toLowerCase().includes(this.search.toLowerCase())));
     }
     return this.filteredColumns;
   }
@@ -553,13 +565,13 @@ export default class VFTable extends Vue {
 
   pageUp(): void {
     if (!this.isPageUpDisabled && !this.hideDefaultFooter) {
-      this.footerModel[this.tab].curPage = this.footerModel[this.tab].curPage + this.footerModel[this.tab].itemsPerPage;
+      this.footerModel[this.tab].curPage += this.footerModel[this.tab].itemsPerPage;
     }
   }
 
   pageDown(): void {
     if (!this.isPageDownDisabled && !this.hideDefaultFooter) {
-      this.footerModel[this.tab].curPage = this.footerModel[this.tab].curPage - this.footerModel[this.tab].itemsPerPage;
+      this.footerModel[this.tab].curPage += this.footerModel[this.tab].itemsPerPage;
     }
   }
 

@@ -145,15 +145,6 @@
       outline: 2px solid #0277BD;
     }
 
-    &--number {
-    }
-
-    &--ntext {
-    }
-
-    &--date {
-    }
-
     &--select {
       cursor: pointer;
     }
@@ -264,7 +255,7 @@
         }
 
         &:active {
-          background-color: #e7dddd;;
+          background-color: #e7dddd;
         }
 
         &.disabled {
@@ -358,9 +349,3 @@
     }
   }
 }
-
-//@keyframes wave {
-//  50% {
-//    transform: scale(.9);
-//  }
-//}
