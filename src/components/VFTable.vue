@@ -525,26 +525,37 @@ export default class VFTable extends Vue {
 
   get sortedItems(): Row[] {
     if (this.currentColumnDir && this.rowKeys.includes(this.currentColumnName[this.tab])) {
-      return this.filteredItems.sort((a, b) => {
-        const modifier = this.currentColumnDir === 'asc' ? 1 : -1;
+      try {
+        return this.filteredItems.sort((a, b) => {
+          let x: string | number;
+          let y: string | number;
+          const modifier = this.currentColumnDir === 'asc' ? 1 : -1;
+          const partA = a[this.currentColumnName[this.tab] as keyof Row];
+          const partB = b[this.currentColumnName[this.tab] as keyof Row];
+          const typeString = partA && partB && (Number.isNaN(Number(partA)) && Number.isNaN(Number(partB)));
+          const typeNumber = partA && partB && !(Number.isNaN(Number(partA)) && Number.isNaN(Number(partB)));
+          const typeBoolean = typeof partA === 'boolean' && typeof partB === 'boolean';
 
-        let x: string;
-        let y: string;
+          if (typeBoolean) {
+            x = Number(partA);
+            y = Number(partB);
+          } else if (typeString) {
+            x = partA.toString().trim().toLowerCase();
+            y = partB.toString().trim().toLowerCase();
+          } else if (typeNumber) {
+            x = Number(partA);
+            y = Number(partB);
+          } else {
+            return 0;
+          }
 
-        const partA = a[this.currentColumnName[this.tab] as keyof Row];
-        const partB = b[this.currentColumnName[this.tab] as keyof Row];
-
-        if (partA && partB) {
-          x = partA.toString().trim().toLowerCase();
-          y = partB.toString().trim().toLowerCase();
-        } else {
+          if (x < y) return -1 * modifier;
+          if (x > y) return 1 * modifier;
           return 0;
-        }
-
-        if (x < y) return -1 * modifier;
-        if (x > y) return 1 * modifier;
-        return 0;
-      });
+        });
+      } catch (err) {
+        console.error(`Error in sortedItems prop, ${err}`);
+      }
     }
     return this.filteredItems;
   }
