@@ -38,7 +38,7 @@
           >
             {{header.text}}
 
-            <div
+            <span
              v-if="header.sortable
              && currentColumnName[tab] === header.row_key
              && filteredItems.length > 1"
@@ -69,14 +69,16 @@
                   arrow_drop_down
                 </i>
               </button>
-            </div>
+            </span>
           </th>
         </tr>
         </thead>
 
         <tbody>
         <!--======================= ROWS =======================-->
-        <tr class="column-search-row" v-if="columnSearch">
+        <tr
+         v-if="columnSearch && tablesModel[tab].rows.length > 1"
+         class="column-search-row">
           <td
            v-for="(searchInput, index) in tablesModel[tab].headers"
            :key="index"
@@ -307,25 +309,25 @@ export default class VFTable extends Vue {
     this.tablesModel = cloneDeep(this.tables);
 
     // 2. OPTIONAL: Add column count and number {count: number} for each row in table
-    if (this.countable && !this.isNoData) this.addCount();
+    if (this.countable) this.addCount();
 
     // 3. OPTIONAL: Sort columns by order
-    if (this.ordered && !this.isNoData) this.sortColumnsByOrder();
+    if (this.ordered) this.sortColumnsByOrder();
 
     // 4. Add default {sort_dir: 'asc'} for sorting
-    if (!this.isNoData) this.addSortDirToRow();
+    this.addSortDirToRow();
 
     // 5. create search model
-    if (!this.isNoData) this.createColumnsSearchModel();
+    this.createColumnsSearchModel();
 
     // 6. OPTIONAL Set footer model
     if (!this.hideDefaultFooter) this.createFooterModel();
 
     // 7. Emit cb keys array data for each table
-    if (!this.isNoData) this.$emit('submitCheckboxesData', this.createCheckboxesData());
+    this.$emit('submitCheckboxesData', this.createCheckboxesData());
 
     // 8. Emit cb keys array list for each table
-    if (!this.isNoData) this.$emit('submitColumnsKeys', this.createCheckboxesModelKeys());
+    this.$emit('submitColumnsKeys', this.createCheckboxesModelKeys());
   }
 
   get isNoData(): boolean {
@@ -526,8 +528,18 @@ export default class VFTable extends Vue {
       return this.filteredItems.sort((a, b) => {
         const modifier = this.currentColumnDir === 'asc' ? 1 : -1;
 
-        const x = a[this.currentColumnName[this.tab] as keyof Row]!.toString().trim().toLowerCase();
-        const y = b[this.currentColumnName[this.tab] as keyof Row]!.toString().trim().toLowerCase();
+        let x: string;
+        let y: string;
+
+        const partA = a[this.currentColumnName[this.tab] as keyof Row];
+        const partB = b[this.currentColumnName[this.tab] as keyof Row];
+
+        if (partA && partB) {
+          x = partA.toString().trim().toLowerCase();
+          y = partB.toString().trim().toLowerCase();
+        } else {
+          return 0;
+        }
 
         if (x < y) return -1 * modifier;
         if (x > y) return 1 * modifier;
